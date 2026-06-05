@@ -45,7 +45,7 @@ body {
   background: #050505;
   filter: none;
   transform: scale(1);
-  transition: filter 0.45s ease, transform 0.45s ease;
+  transition: filter 0.8s ease, transform 0.8s ease;
 }
 
 .page-bg video {
@@ -144,7 +144,7 @@ a {
   padding: 0 13px;
   border-radius: 999px;
   font-size: 12px;
-  font-weight: 700;
+  font-weight: 400;
   color: rgba(255, 255, 255, 0.88);
   transition: color 0.2s ease, background 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
   position: relative;
@@ -158,6 +158,7 @@ a {
 
 .site-nav a.active {
   color: #080808;
+  font-weight: 700;
 }
 
 .nav-icon {
@@ -512,6 +513,98 @@ p {
 
 .large-copy p + p {
   margin-top: 34px;
+}
+
+.about-career {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(340px, 0.78fr);
+  gap: 80px;
+  align-items: start;
+}
+
+.about-intro {
+  max-width: 680px;
+  color: #d8d6cf;
+  font-size: 18px;
+  line-height: 2.05;
+  font-weight: 400;
+}
+
+.section-kicker {
+  margin-bottom: 34px;
+  color: var(--text);
+  font-size: clamp(36px, 4vw, 56px);
+  line-height: 1.02;
+  font-weight: 800;
+}
+
+.about-intro p + p {
+  margin-top: 28px;
+}
+
+.marker-highlight {
+  display: inline;
+  color: var(--text);
+  background: linear-gradient(transparent 50%, rgba(255, 184, 0, 0.64) 50%, rgba(255, 184, 0, 0.64) 90%, transparent 90%);
+  box-decoration-break: clone;
+  -webkit-box-decoration-break: clone;
+  padding: 0 2px;
+}
+
+.career-timeline {
+  display: grid;
+  gap: 0;
+}
+
+.career-timeline article {
+  display: grid;
+  grid-template-columns: 72px minmax(0, 1fr);
+  gap: 28px;
+  padding: 24px 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.18);
+}
+
+.career-timeline article:last-child {
+  border-bottom: 0;
+}
+
+.career-timeline span {
+  color: var(--accent);
+  font-weight: 800;
+}
+
+.career-timeline h3 {
+  margin-bottom: 8px;
+  font-size: 24px;
+  line-height: 1.1;
+}
+
+.career-timeline p {
+  margin-bottom: 0;
+  color: #c8c6bf;
+  line-height: 1.75;
+}
+
+.timeline-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 16px;
+}
+
+.timeline-tags span {
+  display: inline-flex;
+  align-items: center;
+  min-height: 30px;
+  padding: 6px 12px;
+  border: 0;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.06);
+  color: rgba(247, 247, 243, 0.8);
+  font-size: 12px;
+  font-weight: 400;
+  line-height: 1;
+  white-space: nowrap;
 }
 
 .work-card {
@@ -887,6 +980,22 @@ li::before {
     color: var(--accent);
     transform: translate3d(8px, 0, 0);
   }
+
+  .timeline-tags {
+    max-height: 0;
+    margin-top: 0;
+    opacity: 0;
+    overflow: hidden;
+    transform: translate3d(0, 8px, 0);
+    transition: max-height 0.48s ease, margin-top 0.48s ease, opacity 0.38s ease, transform 0.48s ease;
+  }
+
+  .career-timeline article:hover .timeline-tags {
+    max-height: 120px;
+    margin-top: 16px;
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
 }
 
 @media (max-width: 760px) {
@@ -958,6 +1067,30 @@ li::before {
 
   .content-main h2 {
     margin-bottom: 32px;
+  }
+
+  .about-career,
+  .career-timeline article {
+    grid-template-columns: 1fr;
+  }
+
+  .about-career {
+    gap: 38px;
+  }
+
+  .about-intro {
+    font-size: 16px;
+    line-height: 1.9;
+  }
+
+  .section-kicker {
+    margin-bottom: 24px;
+    font-size: 34px;
+  }
+
+  .career-timeline article {
+    gap: 10px;
+    padding: 22px 0;
   }
 
   .work-card {
