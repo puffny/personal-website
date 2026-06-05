@@ -202,7 +202,7 @@ const setActiveNav = (id) => {
 function updateHomeNav(activeId) {
   if (!homeNavItem || !homeNavIcon || !homeNavText) return;
   const isHome = activeId === "home";
-  homeNavIcon.className = isHome ? "ph-fill ph-house" : "ph-fill ph-arrow-up";
+  homeNavIcon.className = isHome ? "ph-fill ph-house" : "ph-fill ph-arrow-fat-line-up";
   homeNavText.textContent = isHome ? "主页" : "回到首页";
   homeNavItem.setAttribute("aria-label", isHome ? "主页" : "回到首页");
 
