@@ -409,12 +409,6 @@ p {
   will-change: transform;
 }
 
-.contact-grid a:hover,
-.contact-grid p:hover {
-  color: var(--accent);
-  transform: translate3d(8px, 0, 0);
-}
-
 .copy-toast {
   position: fixed;
   left: 50%;
@@ -887,11 +881,22 @@ li::before {
   padding-top: 90px;
 }
 
+@media (hover: hover) and (pointer: fine) {
+  .contact-grid a:hover,
+  .contact-grid p:hover {
+    color: var(--accent);
+    transform: translate3d(8px, 0, 0);
+  }
+}
+
 @media (max-width: 760px) {
+  .hero-top,
+  .hero-copy,
+  .contact-grid,
   .content-shell,
   .project-hero,
   .project-layout {
-    width: min(calc(100% - 72px), var(--max));
+    width: min(calc(100% - 48px), var(--max));
   }
 
   .site-nav {
@@ -926,6 +931,10 @@ li::before {
 
   .hero .pill-button {
     display: none;
+  }
+
+  .hero h1 {
+    font-size: 56px;
   }
 
   .contact-grid {
