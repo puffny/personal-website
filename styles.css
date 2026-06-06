@@ -848,7 +848,7 @@ p {
 .thinking-article h3 {
   margin: 92px 0 26px;
   color: var(--text);
-  font-size: clamp(28px, 3vw, 32px);
+  font-size: clamp(24px, 3vw, 32px);
   line-height: 1.14;
   font-weight: 700;
 }
@@ -1578,11 +1578,11 @@ li::before {
   }
 
   .hero h1 {
-    font-size: 56px;
+    font-size: 48px;
   }
 
   .eyebrow {
-    font-size: 24px;
+    font-size: 20px;
   }
 
   .contact-grid {
@@ -1668,7 +1668,7 @@ li::before {
   .thinking-article h3 {
     margin-top: 64px;
     margin-bottom: 20px;
-    font-size: 28px;
+    font-size: 24px;
     line-height: 1.16;
   }
 
@@ -1698,7 +1698,7 @@ li::before {
   }
 
   .final-contact-section {
-    padding-bottom: 128px;
+    padding-bottom: 320px;
   }
 
   .about-intro {
@@ -1707,7 +1707,7 @@ li::before {
   }
 
   .section-kicker {
-    margin-bottom: 24px;
+    margin-bottom: 48px;
     font-size: 34px;
   }
 
