@@ -19,9 +19,8 @@ function initRevealInteractions() {
     ".work-card",
     ".project-list a",
     ".strength-card",
-    ".thinking-card",
-    ".ai-flow",
-    ".ai-tool-grid article",
+    ".thinking-article > *",
+    ".article-figure img",
     ".final-contact",
     ".skill-group span",
     ".tool-grid span",
@@ -222,7 +221,7 @@ function updateHomeNav(activeId) {
 }
 
 if (navItems.length) {
-  const sections = ["home", "summary", "strengths", "skills", "ai-lab", "contact"]
+  const sections = ["home", "summary", "strengths", "skills"]
     .map((id) => document.getElementById(id))
     .filter(Boolean);
 

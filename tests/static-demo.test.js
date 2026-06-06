@@ -32,8 +32,6 @@ includesAll(index, [
   "ph-fill ph-briefcase",
   "ph-fill ph-sparkle",
   "ph-fill ph-lightbulb",
-  "ph-fill ph-robot",
-  "ph-fill ph-chat-circle-dots",
   "ph ph-envelope-simple",
   "ph ph-phone",
   "ph ph-globe",
@@ -60,27 +58,33 @@ includesAll(index, [
   "id=\"strengths\"",
   "href=\"#strengths\"",
   "href=\"#skills\"",
-  "href=\"#ai-lab\"",
   "id=\"contact\"",
   "Core Strengths",
-  "Design Thinking",
-  "AI Lab",
+  "Design Thinking & AI",
+  "12年设计工作的思考与探索",
+  "刚进入设计行业时",
+  "GPT、Claude、Codex、Cursor",
+  "Design for<br />People",
+  "AI Design Workflow.png",
+  "Build This Website With AI.png",
   "复杂系统设计",
   "用户体验优化",
   "视觉与交互表达",
-  "Design for People",
   "下载PDF简历",
   "首页",
   "职业经历",
   "核心能力",
   "设计思考",
-  "AI实验室",
-  "联系方式",
 ]);
 
 assert(
   !index.includes("section-label"),
   "Expected homepage section numbers to be removed"
+);
+
+assert(
+  !index.includes("final-contact-links"),
+  "Expected footer contact links to be removed"
 );
 
 assert(
@@ -117,7 +121,6 @@ includesAll(styles, [
   ".home-page.page-scrolled .page-bg",
   "filter: blur(48px)",
   ".page-bg::after",
-  "radial-gradient(ellipse at center, rgba(0, 0, 0, 0) 42%, rgba(0, 0, 0, 0.58) 100%)",
   "rgba(0, 0, 0, 0.6)",
   ".hero",
   ".work-card",
@@ -150,7 +153,8 @@ includesAll(styles, [
   ".project-list a::after",
   "--edge-proximity",
   "--cursor-angle",
-  "conic-gradient(from var(--cursor-angle)",
+  "conic-gradient(",
+  "from var(--cursor-angle)",
   "rgb(255 255 255 / 64%)",
   "--glass-bg",
   "backdrop-filter: blur(22px) saturate(1.15)",
