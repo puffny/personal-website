@@ -18,6 +18,11 @@ function initRevealInteractions() {
     ".large-copy p",
     ".work-card",
     ".project-list a",
+    ".strength-card",
+    ".thinking-card",
+    ".ai-flow",
+    ".ai-tool-grid article",
+    ".final-contact",
     ".skill-group span",
     ".tool-grid span",
     ".info-columns > div",
@@ -53,7 +58,7 @@ function initRevealInteractions() {
 function initMagneticHover() {
   if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
 
-  const magneticItems = Array.from(document.querySelectorAll(".pill-button, .project-list a, .showcase-card"));
+  const magneticItems = Array.from(document.querySelectorAll(".pill-button, .project-list a, .strength-card, .showcase-card"));
   magneticItems.forEach((item) => {
     item.classList.add("magnetic-hover");
 
@@ -76,7 +81,7 @@ function initMagneticHover() {
 
 function initProjectEdgeGlow() {
   const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-  const edgeGlowCards = Array.from(document.querySelectorAll(".project-list a"));
+  const edgeGlowCards = Array.from(document.querySelectorAll(".project-list a, .strength-card"));
 
   edgeGlowCards.forEach((card) => {
     card.classList.add("edge-glow-card");
@@ -183,8 +188,10 @@ function initContactCopy() {
 if (hero) {
   const updateHeroScrollState = () => {
     const isScrolled = window.scrollY > window.innerHeight * 0.3;
+    const isPastHero = window.scrollY > window.innerHeight * 0.3;
     hero.classList.toggle("scrolled", isScrolled);
     document.body.classList.toggle("page-scrolled", isScrolled);
+    document.body.classList.toggle("nav-visible", isPastHero);
   };
 
   updateHeroScrollState();
@@ -203,8 +210,8 @@ function updateHomeNav(activeId) {
   if (!homeNavItem || !homeNavIcon || !homeNavText) return;
   const isHome = activeId === "home";
   homeNavIcon.className = isHome ? "ph-fill ph-house" : "ph-fill ph-arrow-fat-line-up";
-  homeNavText.textContent = isHome ? "主页" : "回到首页";
-  homeNavItem.setAttribute("aria-label", isHome ? "主页" : "回到首页");
+  homeNavText.textContent = isHome ? "首页" : "回到首页";
+  homeNavItem.setAttribute("aria-label", isHome ? "首页" : "回到首页");
 
   if (!isHome && !hasPlayedBackToTopHint) {
     hasPlayedBackToTopHint = true;
@@ -215,7 +222,7 @@ function updateHomeNav(activeId) {
 }
 
 if (navItems.length) {
-  const sections = ["home", "summary", "experience", "skills", "links"]
+  const sections = ["home", "summary", "strengths", "skills", "ai-lab", "contact"]
     .map((id) => document.getElementById(id))
     .filter(Boolean);
 

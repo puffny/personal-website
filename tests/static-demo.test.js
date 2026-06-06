@@ -9,9 +9,10 @@ function read(file) {
 }
 
 function includesAll(source, fragments) {
+  const normalizedSource = source.replace(/\s+/g, " ");
   for (const fragment of fragments) {
     assert(
-      source.includes(fragment),
+      source.includes(fragment) || normalizedSource.includes(fragment.replace(/\s+/g, " ")),
       `Expected file to include: ${fragment}`
     );
   }
@@ -27,11 +28,12 @@ includesAll(index, [
   "page-bg",
   "page-bg-video",
   "https://cdn.jsdelivr.net/npm/@phosphor-icons/web@2.1.2",
-  "ph ph-house",
-  "ph ph-user",
-  "ph ph-briefcase",
-  "ph ph-sparkle",
-  "ph ph-paper-plane-tilt",
+  "ph-fill ph-house",
+  "ph-fill ph-briefcase",
+  "ph-fill ph-sparkle",
+  "ph-fill ph-lightbulb",
+  "ph-fill ph-robot",
+  "ph-fill ph-chat-circle-dots",
   "ph ph-envelope-simple",
   "ph ph-phone",
   "ph ph-globe",
@@ -44,33 +46,36 @@ includesAll(index, [
   "nav-indicator",
   "LIANG",
   "HUIFENG",
-  "UI DESIGNER",
+  "UX Designer",
   "305896796@qq.com",
   "130 1766 2166",
   "puffny.cn",
   "ZhengZhou，HeNan",
-  "12年工作经验",
+  "10+ 年设计经验",
   "杭州咏创科技集团有限公司",
   "五洲工程顾问集团有限公司",
   "浙江妮素网络科技股份有限公司",
   "杭州空极科技有限公司",
-  "天目数智平台管理系统",
-  "浙里报账2.0改版",
-  "素店",
-  "柏品",
-  "黄河科技学院",
-  "艺术设计",
   "id=\"summary\"",
-  "id=\"experience\"",
-  "id=\"skills\"",
-  "id=\"links\"",
+  "id=\"strengths\"",
+  "href=\"#strengths\"",
+  "href=\"#skills\"",
+  "href=\"#ai-lab\"",
+  "id=\"contact\"",
+  "Core Strengths",
+  "Design Thinking",
+  "AI Lab",
+  "复杂系统设计",
+  "用户体验优化",
+  "视觉与交互表达",
+  "Design for People",
   "下载PDF简历",
-  "主页",
-  "个人介绍",
-  "工作经验",
-  "专业技能",
-  "项目展示",
-  "projects/pixel-pathway/",
+  "首页",
+  "职业经历",
+  "核心能力",
+  "设计思考",
+  "AI实验室",
+  "联系方式",
 ]);
 
 assert(
@@ -81,6 +86,19 @@ assert(
 assert(
   !index.includes("floating-template"),
   "Expected floating template button to be removed from homepage"
+);
+
+assert(
+  !index.includes("<section class=\"content-shell\" id=\"work-history\"") &&
+    !index.includes("<section class=\"content-shell links-section\" id=\"links\""),
+  "Expected old work, skills, and project showcase sections to be removed"
+);
+
+assert(
+  !index.includes("<h2>工作经验</h2>") &&
+    !index.includes("<h2>专业技能</h2>") &&
+    !index.includes("<h2>项目展示</h2>"),
+  "Expected old section headings to be removed from the homepage"
 );
 
 includesAll(project, [
@@ -105,7 +123,7 @@ includesAll(styles, [
   ".work-card",
   ".content-main h2",
   "grid-template-columns: minmax(0, 1fr)",
-  "width: min(calc(100% - 72px), var(--max))",
+  "width: min(var(--max), calc(100% - 96px))",
   "color: var(--accent)",
   "statusPulse",
   "animation: statusPulse",
@@ -140,10 +158,10 @@ includesAll(styles, [
   ".contact-grid a:hover",
   ".showcase-card:hover",
   "@media (prefers-reduced-motion: reduce)",
-  "height: clamp(128px, 12.5vw, 190px)",
+  "height: 180px",
   "bottom: clamp(136px, 17vh, 190px)",
   "min-height: calc(2em * 0.98)",
-  "padding-top: 38vh",
+  "top: clamp(190px, calc(50svh - 90px), 380px)",
   "font-size: 18px",
   "font-weight: 400",
   "line-height: 2.2",
@@ -186,7 +204,7 @@ includesAll(script, [
   "window.innerHeight * 0.3",
   "setActiveNav",
   "updateHomeNav",
-  "ph ph-arrow-up",
+  "ph-arrow-fat-line-up",
   "回到首页",
   "back-to-top-hint",
   "moveNavIndicator",
