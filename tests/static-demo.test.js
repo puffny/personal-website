@@ -20,6 +20,10 @@ function includesAll(source, fragments) {
 
 const index = read("index.html");
 const project = read(path.join("projects", "pixel-pathway", "index.html"));
+const tianmuProject = read(path.join("project", "tianmu", "index.html"));
+const baozhangProject = read(path.join("project", "baozhang", "index.html"));
+const senbenProject = read(path.join("project", "senben", "index.html"));
+const caseScript = read("case.js");
 const styles = read("styles.css");
 const script = read("script.js");
 
@@ -30,7 +34,7 @@ includesAll(index, [
   "https://cdn.jsdelivr.net/npm/@phosphor-icons/web@2.1.2",
   "ph-fill ph-house",
   "ph-fill ph-briefcase",
-  "ph-fill ph-sparkle",
+  "ph-fill ph-folder-open",
   "ph-fill ph-lightbulb",
   "ph ph-envelope-simple",
   "ph ph-phone",
@@ -55,11 +59,14 @@ includesAll(index, [
   "浙江妮素网络科技股份有限公司",
   "杭州空极科技有限公司",
   "id=\"summary\"",
-  "id=\"strengths\"",
-  "href=\"#strengths\"",
+  "id=\"projects\"",
+  "href=\"#projects\"",
   "href=\"#skills\"",
   "id=\"contact\"",
-  "Core Strengths",
+  "Selected Projects",
+  "核心项目案例",
+  "天目数智WEB平台",
+  "project/tianmu/index.html",
   "Design Thinking & AI",
   "12年设计工作的思考与探索",
   "刚进入设计行业时",
@@ -67,13 +74,14 @@ includesAll(index, [
   "Design for<br />People",
   "AI Design Workflow.png",
   "Build This Website With AI.png",
-  "复杂系统设计",
-  "用户体验优化",
-  "视觉与交互表达",
+  "浙里报账",
+  "森本新闻",
+  "project/baozhang/index.html",
+  "project/senben/index.html",
   "下载PDF简历",
   "首页",
   "职业经历",
-  "核心能力",
+  "项目案例",
   "设计思考",
 ]);
 
@@ -113,6 +121,22 @@ includesAll(project, [
   "其他项目",
 ]);
 
+[tianmuProject, baozhangProject, senbenProject].forEach((projectPage) => {
+  includesAll(projectPage, [
+    "case-page",
+    "page-bg",
+    "page-bg-video",
+    "../../assets/hero-background.mp4",
+    "case-stage",
+    "case-back-link",
+    "ph-fill ph-caret-left",
+    "../../index.html?restoreProjectScroll=1",
+    "返回",
+    "case-image-stack",
+    "../../case.js",
+  ]);
+});
+
 includesAll(styles, [
   "--accent",
   ".page-bg",
@@ -139,6 +163,9 @@ includesAll(styles, [
   ".nav-icon i",
   ".contact-icon",
   ".showcase-card",
+  ".case-page",
+  ".case-back-link",
+  ".case-image-stack",
   ".showcase-marquee",
   ".showcase-track",
   "aspect-ratio: 16 / 9",
@@ -219,10 +246,19 @@ includesAll(script, [
   "initMagneticHover",
   ".showcase-card",
   "initProjectEdgeGlow",
+  "initProjectScrollMemory",
+  "liangPortfolioProjectScrollY",
+  "restoreProjectScroll",
   "edgeGlowCards",
   "--edge-proximity",
   "--cursor-angle",
   "prefers-reduced-motion",
+]);
+
+includesAll(caseScript, [
+  "caseBackLink",
+  "history.back()",
+  "document.referrer.includes(\"index.html\")",
 ]);
 
 assert(

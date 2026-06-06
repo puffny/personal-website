@@ -6,6 +6,26 @@ const homeNavItem = document.querySelector(".nav-brand[href='#home']");
 const homeNavIcon = homeNavItem?.querySelector("i");
 const homeNavText = homeNavItem?.querySelector(".nav-text");
 let hasPlayedBackToTopHint = false;
+const projectScrollKey = "liangPortfolioProjectScrollY";
+
+function initProjectScrollMemory() {
+  document.querySelectorAll(".selected-project").forEach((projectLink) => {
+    projectLink.addEventListener("click", () => {
+      sessionStorage.setItem(projectScrollKey, String(window.scrollY));
+    });
+  });
+
+  const params = new URLSearchParams(window.location.search);
+  if (params.get("restoreProjectScroll") !== "1") return;
+
+  const savedScrollY = Number(sessionStorage.getItem(projectScrollKey));
+  if (!Number.isFinite(savedScrollY)) return;
+
+  requestAnimationFrame(() => {
+    window.scrollTo({ top: savedScrollY, left: 0, behavior: "auto" });
+    window.history.replaceState(null, "", window.location.pathname);
+  });
+}
 
 function initRevealInteractions() {
   const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -18,7 +38,7 @@ function initRevealInteractions() {
     ".large-copy p",
     ".work-card",
     ".project-list a",
-    ".strength-card",
+    ".selected-project",
     ".thinking-article > *",
     ".article-figure img",
     ".final-contact",
@@ -57,7 +77,7 @@ function initRevealInteractions() {
 function initMagneticHover() {
   if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
 
-  const magneticItems = Array.from(document.querySelectorAll(".pill-button, .project-list a, .strength-card, .showcase-card"));
+  const magneticItems = Array.from(document.querySelectorAll(".pill-button, .project-list a, .showcase-card"));
   magneticItems.forEach((item) => {
     item.classList.add("magnetic-hover");
 
@@ -80,7 +100,7 @@ function initMagneticHover() {
 
 function initProjectEdgeGlow() {
   const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-  const edgeGlowCards = Array.from(document.querySelectorAll(".project-list a, .strength-card"));
+  const edgeGlowCards = Array.from(document.querySelectorAll(".project-list a"));
 
   edgeGlowCards.forEach((card) => {
     card.classList.add("edge-glow-card");
@@ -116,6 +136,7 @@ function initProjectEdgeGlow() {
 initRevealInteractions();
 initMagneticHover();
 initProjectEdgeGlow();
+initProjectScrollMemory();
 initContactCopy();
 
 function initContactCopy() {
@@ -221,7 +242,7 @@ function updateHomeNav(activeId) {
 }
 
 if (navItems.length) {
-  const sections = ["home", "summary", "strengths", "skills"]
+  const sections = ["home", "summary", "projects", "skills"]
     .map((id) => document.getElementById(id))
     .filter(Boolean);
 
