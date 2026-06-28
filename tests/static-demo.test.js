@@ -25,9 +25,12 @@ function includesAll(file, fragments) {
   "src/App.jsx",
   "src/components/shared/CustomCursor.jsx",
   "src/components/shared/CustomCursor.css",
+  "src/components/Project/ProjectBackToTop.jsx",
+  "src/components/Project/CaseBackLink.jsx",
   "src/pages/HomePage.jsx",
   "src/components/Home/FinalContactSection.jsx",
   "src/hooks/useSmoothScroll.js",
+  "src/utils/pageScroll.js",
   "src/hooks/useScrollParallax.js",
   "src/hooks/useRevealInteractions.js",
   "styles.css",
@@ -45,6 +48,8 @@ includesAll("src/hooks/useSmoothScroll.js", [
   "lenis.raf(time * 1000)",
   "gsap.ticker.lagSmoothing(0)",
   "ScrollTrigger.refresh()",
+  "window.__liangPortfolioLenis = lenis",
+  "delete window.__liangPortfolioLenis",
   "document.fonts?.ready",
   "window.addEventListener(\"resize\", refreshScrollTriggersAfterResize)",
   "window.setTimeout(refreshScrollTriggers, 150)",
@@ -77,6 +82,48 @@ includesAll("src/App.jsx", [
   "aria-hidden=\"true\"",
 ]);
 
+includesAll("src/App.jsx", [
+  "if (event.defaultPrevented) return;",
+  "const shouldRestoreProjectScroll = nextUrl.searchParams.get(\"restoreProjectScroll\") === \"1\";",
+  "scrollPageToTop",
+  "if (!shouldRestoreProjectScroll && !nextUrl.hash) scrollPageToTop",
+]);
+
+assert(!read("src/App.jsx").includes("document.startViewTransition"), "Project navigation should use a simple fade instead of View Transition shared-element motion");
+assert(!read("src/App.jsx").includes("flushSync"), "Simple project navigation should not need forced synchronous route transitions");
+
+includesAll("src/pages/ProjectPage.jsx", [
+  "CaseBackLink",
+  "ProjectBackToTop",
+  "{isVisualCase ? <CaseBackLink onBack={handleCaseBack} /> : null}",
+  "<ProjectBackToTop variant={project.type === \"feed\" ? \"feed\" : undefined} />",
+]);
+
+includesAll("src/components/Project/CaseBackLink.jsx", [
+  "case-back-link",
+  "href=\"/?restoreProjectScroll=1\"",
+  "ph-fill ph-caret-left",
+]);
+
+assert(!read("src/components/Project/SenbenProject.jsx").includes("case-back-link"), "Senben case back link should live at the page overlay level, not inside senben main content");
+assert(!read("src/components/Project/CaseProject.jsx").includes("case-back-link"), "Visual case back link should live at the page overlay level, not inside case main content");
+assert(!read("src/components/Project/ProjectImageFeed.jsx").includes("case-back-link"), "Feed case back link should live at the page overlay level, not inside feed main content");
+
+includesAll("src/components/Project/ProjectBackToTop.jsx", [
+  "SHOW_AFTER_Y = 120",
+  "project-back-to-top",
+  "ph-fill ph-arrow-fat-line-up",
+  "scrollPageToTop({ smooth: true })",
+]);
+
+includesAll("src/utils/pageScroll.js", [
+  "window.__liangPortfolioLenis",
+  "lenis.reset?.()",
+  "lenis.scrollTo(y, { immediate: true, force: true })",
+  "scrollPageToTop",
+  "window.scrollTo({ top: y, left: 0, behavior: \"auto\" })",
+]);
+
 includesAll("src/components/shared/CustomCursor.jsx", [
   "useEffect",
   "useRef",
@@ -87,6 +134,7 @@ includesAll("src/components/shared/CustomCursor.jsx", [
   "custom-cursor--pressed",
   "custom-cursor--native",
   ".selected-work-visual-link",
+  ".final-contact-list p",
   "custom-cursor-ripple",
   "animationend",
   "addEventListener(\"pointermove\"",
@@ -113,6 +161,7 @@ includesAll("src/components/shared/CustomCursor.css", [
   "width: 9px;",
   "height: 9px;",
   ".selected-work-visual-link",
+  ".final-contact-list p",
   "cursor: pointer;",
   ".custom-cursor--native",
   "background-color 180ms ease",
@@ -137,6 +186,16 @@ includesAll("src/components/Home/SelectedWorksSection.jsx", [
   "<div className=\"selected-work-copy\">",
 ]);
 
+const selectedWorksBlock = read("src/data/siteData.js").match(/selectedWorks:\s*{[\s\S]*?\n  aiLab:/)?.[0] || "";
+const selectedWorkSlugOrder = [...selectedWorksBlock.matchAll(/slug: "(tianmu|baozhang|senben)"/g)].map(
+  ([, slug]) => slug,
+);
+assert.deepStrictEqual(
+  selectedWorkSlugOrder,
+  ["tianmu", "baozhang", "senben"],
+  "Homepage selected work order should be tianmu -> baozhang -> senben",
+);
+
 assert(
   !read("src/components/Home/SelectedWorksSection.jsx").includes("<a className=\"selected-work-card\""),
   "Selected work cards should not be full-card links; only thumbnails should navigate",
@@ -144,6 +203,11 @@ assert(
 
 includesAll("src/hooks/useProjectScrollMemory.js", [
   "document.querySelectorAll(\".selected-project, .selected-work-visual-link\")",
+  "cancelRestoreProjectScroll();",
+  "jumpToPageY(savedScrollY)",
+  "window.location.pathname !== \"/\"",
+  "cancelAnimationFrame(frameId)",
+  "window.clearTimeout(timerId)",
 ]);
 
 assert.strictEqual(
@@ -161,6 +225,9 @@ includesAll("src/hooks/useScrollParallax.js", [
   "gsap.context",
   "ctx.revert",
   "scrub: 0.18",
+  "selectedWorkParallaxSpeed = 0.5",
+  "(1 - selectedWorkParallaxSpeed) / 2",
+  "(1 + selectedWorkParallaxSpeed) / 2",
 ]);
 
 includesAll("styles.css", [
@@ -178,10 +245,32 @@ includesAll("styles.css", [
   "pointer-events: none;",
   ".progressive-bottom-blur-layer",
   ".progressive-bottom-blur-layer:nth-child(8)",
-  "backdrop-filter: blur(24px)",
+  "backdrop-filter: blur(3px) saturate(1.04)",
   "background: rgba(255, 255, 255, 0.001);",
   "mask-image: linear-gradient(to bottom, transparent 52%, #000 76%, #000 100%);",
 ]);
+
+includesAll("styles.css", [
+  ".project-back-to-top",
+  ".project-back-to-top.is-visible",
+  ".case-back-link",
+  "z-index: 80;",
+  "right: max(34px, calc((100vw - var(--max)) / 2));",
+  "bottom: clamp(18px, 3vw, 34px);",
+]);
+
+includesAll("styles.css", [
+  ".project-page main,",
+  ".case-page main",
+  "animation: projectPageFadeIn 1s cubic-bezier(0.22, 1, 0.36, 1) both;",
+  "@keyframes projectPageFadeIn",
+]);
+
+const projectPageFadeInBlock = read("styles.css").match(/@keyframes projectPageFadeIn\s*{[\s\S]*?\n}/)?.[0] || "";
+assert(projectPageFadeInBlock && !projectPageFadeInBlock.includes("transform:"), "Project page fade-in should not transform main because fixed buttons must stay viewport-fixed");
+
+assert(!read("styles.css").includes("::view-transition"), "Project transition CSS should not use View Transition pseudo-elements");
+assert(!read("styles.css").includes("view-transition-name"), "Project transition CSS should not use shared-element transition names");
 
 assert(!read("styles.css").includes(".progressive-bottom-blur::after"), "Bottom blur should not add a darkening gradient overlay");
 assert(!read("styles.css").includes("rgba(5, 5, 5, 0.48)"), "Bottom blur should not use a black gradient");
@@ -217,31 +306,52 @@ includesAll("src/hooks/useRevealInteractions.js", [
 ]);
 
 includesAll("src/hooks/useIntroLoader.js", [
+  "introContentReadyLeadMs = 1000",
   "const completeIntroState =",
+  "const markIntroContentReady =",
   "document.body.classList.remove(\"intro-running\")",
   "document.body.classList.add(\"intro-complete\")",
+  "document.body.classList.add(\"intro-content-ready\")",
+  "duration + 500 - introContentReadyLeadMs",
   "completeIntroState();",
   "if (!introLoader || !introPercent || !introIcon || !introLoaderLine)",
+  "introIconChangeIntervalMs = 680",
+  "introIconTransitionMs = 560",
+  "introIcon.querySelectorAll(\".intro-ui-icon-glyph\")",
+  "nextIcon.className = \"intro-ui-icon-glyph\"",
+  "Math.floor(elapsed / introIconChangeIntervalMs)",
+  "let contentReadyTimer = 0;",
+  "window.clearTimeout(iconCleanupTimer);",
   "let removeTimer = 0;",
+  "window.clearTimeout(contentReadyTimer);",
   "window.clearTimeout(removeTimer);",
 ]);
 
 [
-  /\.home-page\.intro-running \.hero-top,[\s\S]*?\.home-page\.intro-running \.contact-grid\s*{[\s\S]*?\n}/,
-  /\.home-page\.intro-complete \.hero-top,[\s\S]*?\.home-page\.intro-complete \.contact-grid\s*{[\s\S]*?\n}/,
-  /@keyframes introContentRise\s*{[\s\S]*?\n}/,
-  /@keyframes introContactRise\s*{[\s\S]*?\n}/,
+  /\.intro-ui-icon-glyph\s*{[\s\S]*?animation: introIconReveal 0\.68s cubic-bezier\(0\.22, 1, 0\.36, 1\) forwards;[\s\S]*?\n}/,
+  /\.intro-ui-icon-glyph\.is-exiting\s*{[\s\S]*?animation: introIconExit 0\.56s cubic-bezier\(0\.22, 1, 0\.36, 1\) forwards;[\s\S]*?\n}/,
+  /@keyframes introIconReveal\s*{[\s\S]*?filter: blur\(0\);[\s\S]*?\n}/,
+  /@keyframes introIconExit\s*{[\s\S]*?filter: blur\(4px\);[\s\S]*?\n}/,
 ].forEach((pattern) => {
   const block = read("styles.css").match(pattern)?.[0] || "";
-  assert(block && !block.includes("filter:"), "Intro entrance animation should no longer use blur filters");
+  assert(block, "Intro icon reveal/exit animation should be present");
 });
 
 assert(!read("src/hooks/useRevealInteractions.js").includes("index % 6"), "Reveal delay should not loop and make lower items animate before higher items");
 assert(!read("src/hooks/useRevealInteractions.js").includes("driftDirection"), "Reveal should not alternate left/right entry direction");
 assert(read("src/hooks/useRevealInteractions.js").includes("!element.closest(\"#ai-lab\")"), "AI Lab should not receive reveal transforms because it uses ScrollTrigger pin");
+assert(read("src/hooks/useRevealInteractions.js").includes("!element.closest(\".final-contact-section\")"), "Final contact section should not receive global reveal transforms");
+assert(read("src/hooks/useRevealInteractions.js").includes("element.matches(\"#core .content-main h2\")"), "Core title should remain in reveal transforms while core body stays excluded");
 assert(!read("src/hooks/useRevealInteractions.js").includes("\".hero-top\""), "Hero top should be controlled by intro animation, not scroll reveal");
 assert(!read("src/hooks/useRevealInteractions.js").includes("\".hero-copy\""), "Hero copy should be controlled by intro animation, not scroll reveal");
 assert(!read("src/hooks/useRevealInteractions.js").includes("\".contact-grid\""), "Hero contact should be controlled by intro animation, not scroll reveal");
+assert(!read("src/hooks/useRevealInteractions.js").includes("\".final-contact\""), "Final THANKS section should not use global scroll reveal");
+includesAll("src/components/Home/HeroSection.jsx", [
+  "heroCopyRevealDelayMs",
+  "window.setTimeout(() => setIntroReady(true), heroCopyRevealDelayMs)",
+  "intro-content-ready",
+  "triggerOnScroll={false}",
+]);
 assert(!read("styles.css").includes("introUxViewportTest"), "Unused introUxViewportTest keyframes should be removed");
 
 includesAll("src/components/shared/TextPressure.jsx", [
@@ -250,8 +360,17 @@ includesAll("src/components/shared/TextPressure.jsx", [
   "window.removeEventListener(\"resize\", debouncedSetSize)",
 ]);
 
+includesAll("src/hooks/useContactCopy.js", [
+  ".final-contact-list p",
+  "已复制",
+  "navigator.clipboard.writeText",
+  "role\", \"button",
+  "keydown",
+]);
+
 includesAll("styles.css", [
   ".reveal-heading",
+  ".reveal-heading.is-visible",
   ".reveal-copy",
   ".reveal-stat",
   ".reveal-step",
@@ -269,7 +388,7 @@ assert(!revealVisibleBlock.includes("filter:"), "Global reveal should no longer 
 
 includesAll("styles.css", [
   ".hero-copy",
-  "top: clamp(210px, calc(50svh - 10px), 400px);",
+  "top: clamp(210px, calc(50svh - 10px), 380px);",
 ]);
 
 assert(!read("src/hooks/useRevealInteractions.js").includes("--reveal-scale"), "Layered reveal should not scale content modules");
@@ -280,12 +399,15 @@ includesAll("src/components/Home/CoreSection.jsx", [
   "gsap",
   "ScrollTrigger",
   "gsap.context",
+  "desktopQuery",
+  "isStaticLayout",
   "trigger: section",
-  "start: \"top 70%\"",
-  "end: \"bottom 30%\"",
+  "start: \"top 50%\"",
+  "end: \"bottom 70%\"",
   "--core-progress",
   "core-progress-bar",
   "<div className=\"core-slide-track\">",
+  "aria-hidden={!isStaticLayout && !isActive}",
 ]);
 
 includesAll("styles.css", [
@@ -293,14 +415,18 @@ includesAll("styles.css", [
   "min-height: 170vh;",
   ".core-pin-frame",
   "position: sticky;",
-  "top: calc(18vh - 20px);",
-  "margin-bottom: 48px;",
-  "min-height: min(420px, 40vh);",
+  "top: calc(16vh - 48px);",
+  "min-height: min(420px, 60vh);",
+  "grid-template-columns: minmax(0, 1fr) minmax(500px, 1fr);",
+  "gap: clamp(0px, 0vw, 120px);",
   ".core-progress-bar",
   ".core-progress-bar span",
+  ".core-slide-track::before",
+  "grid-template-columns: 1fr;",
+  "width: 100%;",
+  "max-width: 100%;",
   ".selected-works-section",
   "padding-top: 152px;",
-  "margin-top: 120px;",
 ]);
 
 includesAll("src/data/siteData.js", [
@@ -327,81 +453,71 @@ includesAll("src/data/siteData.js", ["Figma，Lovart"]);
 includesAll("src/components/Home/AILabSection.jsx", [
   "useRef",
   "ScrollTrigger",
-  "ai-lab-scroll-wrap",
-  "ai-lab-pinned-screen",
+  "const isNarrow = window.matchMedia(\"(max-width: 760px)\").matches;",
+  "let revealObserver;",
   "ai-lab-title-group",
   "ai-lab-copy-group",
-  "ai-lab-pin-group",
   "ai-lab-image-group",
+  "ai-lab-sticky-stage",
+  "ai-lab-content",
+  "ai-lab-intro-group",
   "ai-lab-stage",
   "ai-lab-timeline-track",
   "ai-lab-timeline-fill",
   "ai-lab-sequence-item",
   "ai-lab-sequence-layer",
   "gsap.timeline",
-  "preludeTimeline",
-  "mainTimeline",
-  "start: \"top bottom\"",
-  "end: \"top top\"",
-  "titlePreludeStart",
-  "copyPreludeStart",
-  "imagePinnedStart",
-  "titlePreludeEnd",
-  "contentPreludeEnd",
-  "imagePinnedEnd",
-  "duration: 0.38",
-  "titleEnter+=0.24",
-  "duration: 0.44",
-  "stagger: 0.07",
-  "start: \"top top\"",
-  "end: \"+=2000\"",
-  "imageEnter+=0.08",
-  "imageEnter+=0.12",
-  ".to(timelineLine, { [lineScaleProperty]: 1, duration: 0.55, ease: \"none\" }, \"imageEnter+=0.1\")",
+  "mobileReveal",
+  "IntersectionObserver",
   "titleGroup",
   "copyGroup",
   "imageGroup",
-  "addLabel(\"titleEnter\"",
-  "pin: pinnedScreen",
-  "anticipatePin: 0",
+  "start: \"top 70%\"",
+  "end: \"+=1600\"",
   "invalidateOnRefresh: true",
-  "scrub: true",
+  "scrub: 1",
+  "ScrollTrigger.refresh()",
+  "revealObserver?.disconnect();",
 ]);
 
 assert(!read("src/hooks/useRevealInteractions.js").includes("\".ai-lab-visual\""), "AI Lab visual should be controlled by its own ScrollTrigger sequence");
-assert(!read("src/components/Home/AILabSection.jsx").includes("copyEnter"), "AI Lab main pinned timeline should not restart copy group entrance after prelude");
-assert(!read("src/components/Home/AILabSection.jsx").includes(".to(copyGroup, { y: 0"), "AI Lab pin start should not magnet-pull copy group into place");
-assert(!read("src/components/Home/AILabSection.jsx").includes(".to(imageGroup, { ...contentPinnedEnd, duration: 0.5, ease: revealEase }, \"titleEnter+=0.5\")"), "AI Lab image group should not enter during prelude");
-assert(!read("src/components/Home/AILabSection.jsx").includes(".to(sequenceItems, { autoAlpha: 1, y: 0, filter: \"blur(0px)\", duration: 0.5, stagger: 0.07, ease: revealEase }, \"titleEnter+=0.5\")"), "AI Lab sequence items should not enter during prelude");
-assert(!read("src/components/Home/AILabSection.jsx").includes(".to(sequenceLayers, { ...imagePinnedEnd, duration: 0.5, stagger: 0.07, ease: revealEase }, \"titleEnter+=0.5\")"), "AI Lab sequence layers should not enter during prelude");
-assert(!read("src/components/Home/AILabSection.jsx").includes(".to(timelineLine, { [lineScaleProperty]: 1, duration: 0.5, ease: \"none\" }, \"titleEnter+=0.5\")"), "AI Lab timeline line should not grow during prelude");
 assert(!read("src/components/Home/AILabSection.jsx").includes("sequenceLayers[index]"), "AI Lab pinned stage should not animate individual image layers in sequence");
 assert(!read("src/components/Home/AILabSection.jsx").includes("imagePerformanceTargets"), "AI Lab pinned stage should not move the whole image group after it settles");
-assert(!read("src/components/Home/AILabSection.jsx").includes("imagePinnedStart = { autoAlpha: 0, y: 140, scale: 0.96, filter:"), "AI Lab image group should no longer start with blur");
-assert(!read("src/components/Home/AILabSection.jsx").includes("imagePinnedEnd = { autoAlpha: 1, y: 0, scale: 1, filter:"), "AI Lab image layers should no longer animate blur to the final state");
-assert(!read("src/components/Home/AILabSection.jsx").includes("gsap.set(sequenceItems, { autoAlpha: 0, y: 32, filter:"), "AI Lab sequence items should no longer start with blur");
-assert(!read("src/components/Home/AILabSection.jsx").includes("filter: \"blur(8px)\",\n        transformOrigin: \"center bottom\""), "AI Lab sequence layers should no longer start with blur");
-assert(!read("src/components/Home/AILabSection.jsx").includes(".to(sequenceItems, { autoAlpha: 1, y: 0, filter:"), "AI Lab sequence items should no longer animate blur in the pinned timeline");
+assert(!read("src/components/Home/AILabSection.jsx").includes("autoAlpha"), "AI Lab should use opacity without old autoAlpha timeline remnants");
+assert(!read("src/components/Home/AILabSection.jsx").includes("filter:"), "AI Lab JS should not animate blur");
 const aiLabStepBlock = read("styles.css").match(/\.ai-lab-step\s*{[\s\S]*?\n}/)?.[0] || "";
 const aiLabLayerBlock = read("styles.css").match(/\.ai-lab-layer\s*{[\s\S]*?\n}/)?.[0] || "";
+const mobileStylesBlock = read("styles.css").match(/@media \(max-width: 760px\)\s*{[\s\S]*?\n}\s*$/)?.[0] || "";
 assert(!aiLabStepBlock.includes("filter:"), "AI Lab step CSS should no longer apply blur");
 assert(!aiLabStepBlock.includes("will-change: opacity, transform, filter;"), "AI Lab step CSS should not reserve filter animation");
 assert(!aiLabLayerBlock.includes("filter:"), "AI Lab image layer CSS should no longer apply blur");
 assert(!aiLabLayerBlock.includes("will-change: opacity, transform, filter;"), "AI Lab image layer CSS should not reserve filter animation");
-assert(!read("styles.css").includes(".ai-lab-pinned-screen {\n    min-height: auto;\n    padding: 0;"), "AI Lab mobile pinned screen should preserve top breathing room");
+const aiLabStickyMobileBlock = mobileStylesBlock.match(/\.ai-lab-sticky-stage\s*{[\s\S]*?\n  }/)?.[0] || "";
+assert(
+  aiLabStickyMobileBlock.includes("position: relative;") &&
+    aiLabStickyMobileBlock.includes("top: auto;") &&
+    aiLabStickyMobileBlock.includes("height: auto;"),
+  "AI Lab mobile should stay in normal document flow",
+);
 assert(!read("styles.css").includes(".ai-lab-layer {\n  position: absolute;\n  display: block;\n  width: var(--layer-width);\n  height: var(--layer-height);\n  left: var(--layer-left);\n  bottom: 8px;\n  object-fit: cover;"), "AI Lab image layers should use contain to avoid cropping");
+const aiLabLayer2MobileBlock = mobileStylesBlock.match(/\.ai-lab-layer-2\s*{[\s\S]*?\n  }/)?.[0] || "";
+const aiLabLayer3MobileBlock = mobileStylesBlock.match(/\.ai-lab-layer-3\s*{[\s\S]*?\n  }/)?.[0] || "";
+assert(aiLabLayer2MobileBlock.includes("z-index: 2;"), "AI Lab mobile second image should sit below the third image");
+assert(aiLabLayer3MobileBlock.includes("z-index: 3;"), "AI Lab mobile third image should cover the second image");
 
 includesAll("styles.css", [
   ".ai-lab-section",
   "padding-top: 0;",
   "min-height: auto;",
-  ".ai-lab-scroll-wrap",
-  ".ai-lab-pinned-screen",
+  ".ai-lab-sticky-stage",
+  "position: sticky;",
+  "top: -5%;",
   "padding: clamp(112px, 14vh, 200px) 0 clamp(28px, 4vh, 52px);",
+  ".ai-lab-content",
+  "width: min(var(--max), calc(100% - 96px));",
   ".ai-lab-title-group",
   ".ai-lab-copy-group",
   "border-bottom: 1px solid var(--line);",
-  ".ai-lab-pin-group",
   ".ai-lab-image-group",
   ".ai-lab-stage",
   "margin-top: clamp(18px, 2.6vh, 32px);",
@@ -416,30 +532,50 @@ includesAll("styles.css", [
   ".ai-lab-sequence-item",
   ".ai-lab-sequence-layer",
   "object-fit: contain;",
-  "padding: clamp(88px, 12vh, 120px) 0 0;",
+  "width: 80%;",
+  "aspect-ratio: 602 / 545;",
 ]);
 
 includesAll("src/components/Home/FinalContactSection.jsx", [
+  "useEffect",
+  "useRef",
+  "gsap",
+  "ScrollTrigger",
   "TextPressure",
   "final-contact-section",
+  "final-contact-container",
   "final-thanks",
   "THANKS",
   "flex",
   "minFontSize={96}",
   "final-contact-list",
+  "final-copyright",
   "contactItems.map",
+  "contact.copyright",
+  "finalThanks",
+  "finalContactList",
+  "gsap.timeline",
+  "getRevealOffset",
+  "--final-reveal-container-y",
+  "--final-reveal-thanks-y",
+  "--final-reveal-contact-y",
+  "trigger: section",
+  "start: \"top bottom\"",
+  "end: \"bottom bottom\"",
 ]);
 
 assert(!read("src/pages/HomePage.jsx").includes("final-transition"), "Final Contact should not use the local final transition wrapper after rollback");
-assert(!read("src/components/Home/FinalContactSection.jsx").includes("yPercent"), "Final Contact should not use the local slide-in ScrollTrigger after rollback");
 
 includesAll("src/components/shared/TextPressure.jsx", [
   "fontVariationSettings",
   "mousemove",
   "touchmove",
-  "CompressaPRO-GX.woff2",
+  "Roboto Flex",
+  "https://fonts.googleapis.com/css2?family=Roboto+Flex",
+  "@import url('${fontUrl}')",
   "text-pressure-title",
-  "text-pressure-char",
+  "data-char",
+  "spansRef.current[index]",
 ]);
 
 includesAll("src/hooks/useScrollEffects.js", [
@@ -452,18 +588,43 @@ includesAll("src/hooks/useScrollEffects.js", [
 
 includesAll("styles.css", [
   ".final-contact-section",
-  "min-height: 100svh;",
+  "height: 60svh;",
+  "width: 100%;",
+  "overflow: hidden;",
   "border-top: 0;",
+  ".final-contact-container",
+  "height: 60svh;",
+  "--final-reveal-container-y: -120;",
+  "--final-reveal-thanks-y: 0;",
+  "--final-reveal-contact-y: 0;",
+  "will-change: transform;",
   ".final-contact",
+  "height: 100%;",
+  "align-content: start;",
   ".final-thanks",
-  "grid-row: 2;",
   "width: min(800px, 88vw);",
   "aspect-ratio: 634 / 200;",
-  "margin-right: -0.025em;",
-  "grid-template-rows: 45svh 25svh 30svh;",
+  ".text-pressure-title",
+  "grid-template-rows: auto auto minmax(0, 1fr) auto;",
   ".final-contact-list",
-  "grid-row: 3;",
+  "align-self: start;",
+  "will-change: transform;",
   "border-left: 4px solid var(--accent);",
+  "width: fit-content;",
+  "cursor: pointer;",
+  ".final-contact-list p:hover",
+  ".final-copyright",
+  "grid-row: 4;",
+  "font-size: 11px;",
+  "align-self: end;",
 ]);
+
+const mobileFinalContactSectionBlock = read("styles.css").match(/\.final-contact-section\s*{[\s\S]*?height: 44svh;[\s\S]*?\n  }/)?.[0] || "";
+assert(
+  mobileFinalContactSectionBlock.includes("width: 100%;") &&
+    mobileFinalContactSectionBlock.includes("max-width: none;") &&
+    mobileFinalContactSectionBlock.includes("margin: 0;"),
+  "Final contact section should override mobile content-shell width so its background fills the viewport",
+);
 
 assert(!read("styles.css").includes(".final-thanks .text-pressure-char:last-child"), "Final THANKS period should render as text, not a yellow square");

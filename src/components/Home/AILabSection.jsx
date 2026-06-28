@@ -35,6 +35,7 @@ export default function AILabSection() {
     );
     const isNarrow = window.matchMedia("(max-width: 760px)").matches;
     const lineScaleProperty = isNarrow ? "scaleY" : "scaleX";
+    let revealObserver;
 
     if (reduceMotion) {
       gsap.set(
@@ -82,11 +83,64 @@ export default function AILabSection() {
         transformOrigin: "center bottom",
       });
 
+      if (isNarrow) {
+        const mobileReveal = gsap
+          .timeline({ paused: true })
+          .to(
+            titleGroup,
+            { y: 0, opacity: 1, duration: 0.72, ease: revealEase },
+            0,
+          )
+          .to(
+            copyGroup,
+            { y: 0, opacity: 1, duration: 0.72, ease: revealEase },
+            0.08,
+          )
+          .to(
+            imageGroup,
+            { ...contentEnterEnd, duration: 0.86, ease: revealEase },
+            0.18,
+          )
+          .to(timelineLine, { scaleY: 1, duration: 0.95, ease: "none" }, 0.28)
+          .to(
+            sequenceItems,
+            {
+              y: 0,
+              opacity: 1,
+              duration: 0.72,
+              stagger: 0.1,
+              ease: revealEase,
+            },
+            0.34,
+          )
+          .to(
+            sequenceLayers,
+            {
+              ...contentEnterEnd,
+              duration: 0.78,
+              stagger: 0.08,
+              ease: revealEase,
+            },
+            0.42,
+          );
+
+        revealObserver = new IntersectionObserver(
+          (entries) => {
+            if (!entries.some((entry) => entry.isIntersecting)) return;
+            mobileReveal.play();
+            revealObserver?.disconnect();
+          },
+          { threshold: 0.24, rootMargin: "0px 0px -8% 0px" },
+        );
+        revealObserver.observe(section);
+        return;
+      }
+
       const aiLabTimeline = gsap.timeline({
         scrollTrigger: {
           trigger: section,
           start: "top 70%",
-          end: "+=1200",
+          end: "+=1600",
           // markers: true,
           scrub: 1,
           invalidateOnRefresh: true,
@@ -98,7 +152,7 @@ export default function AILabSection() {
         .to(copyGroup, { y: 0, opacity: 1, duration: 1, ease: revealEase }, 0.6)
         .to(
           imageGroup,
-          { ...contentEnterEnd, duration: 2, ease: revealEase },
+          { ...contentEnterEnd, duration: 3, ease: revealEase },
           2,
         )
         .to(
@@ -120,7 +174,10 @@ export default function AILabSection() {
       ScrollTrigger.refresh();
     }, section);
 
-    return () => ctx.revert();
+    return () => {
+      revealObserver?.disconnect();
+      ctx.revert();
+    };
   }, []);
 
   return (

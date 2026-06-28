@@ -13,6 +13,8 @@ export function useScrollParallax() {
       const hero = document.querySelector(".hero");
       const background = document.querySelector(".page-bg");
       const photo = document.querySelector(".hero-photo");
+      const selectedWorkLayers = gsap.utils.toArray(".selected-work-parallax-layer");
+      const selectedWorkParallaxSpeed = 0.5;
       if (!hero || !background) return;
 
       gsap.set(document.documentElement, {
@@ -30,6 +32,30 @@ export function useScrollParallax() {
           end: "90% top",
           scrub: 0.18,
         },
+      });
+
+      selectedWorkLayers.forEach((layer) => {
+        const card = layer.closest(".selected-work-card");
+        const visual = layer.closest(".selected-work-visual");
+        if (!card || !visual) return;
+
+        gsap.fromTo(layer, {
+          y: () =>
+            -Math.max(0, layer.offsetHeight - visual.offsetHeight) *
+            ((1 - selectedWorkParallaxSpeed) / 2),
+        }, {
+          y: () =>
+            -Math.max(0, layer.offsetHeight - visual.offsetHeight) *
+            ((1 + selectedWorkParallaxSpeed) / 2),
+          ease: "none",
+          scrollTrigger: {
+            trigger: card,
+            start: "top bottom",
+            end: "bottom top",
+            scrub: 0.8,
+            invalidateOnRefresh: true,
+          },
+        });
       });
 
       ScrollTrigger.refresh();

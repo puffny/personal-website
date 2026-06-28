@@ -19,6 +19,7 @@ export function useSmoothScroll() {
       touchMultiplier: 1.1,
       smoothWheel: true,
     });
+    window.__liangPortfolioLenis = lenis;
 
     const updateScrollTriggers = () => ScrollTrigger.update();
     const raf = (time) => {
@@ -63,6 +64,9 @@ export function useSmoothScroll() {
         image.removeEventListener("load", refreshScrollTriggers);
         image.removeEventListener("error", refreshScrollTriggers);
       });
+      if (window.__liangPortfolioLenis === lenis) {
+        delete window.__liangPortfolioLenis;
+      }
       lenis.destroy();
     };
   }, []);

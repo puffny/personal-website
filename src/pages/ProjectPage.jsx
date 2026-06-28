@@ -2,16 +2,20 @@ import { useEffect } from "react";
 import { siteData } from "../data/siteData";
 import { useRevealInteractions } from "../hooks/useRevealInteractions";
 import { useScrollEffects } from "../hooks/useScrollEffects";
+import { scrollPageToTop } from "../utils/pageScroll";
+import CaseBackLink from "../components/Project/CaseBackLink";
 import CaseProject from "../components/Project/CaseProject";
 import ProjectDetail from "../components/Project/ProjectDetail";
+import ProjectBackToTop from "../components/Project/ProjectBackToTop";
 import ProjectImageFeed from "../components/Project/ProjectImageFeed";
+import ProjectReadingProgress from "../components/Project/ProjectReadingProgress";
 import SenbenProject from "../components/Project/SenbenProject";
 
 export default function ProjectPage({ slug, navigate }) {
   const project = siteData.projects[slug];
+  const isVisualCase = ["case", "senben", "feed"].includes(project?.type);
 
   useEffect(() => {
-    const isVisualCase = ["case", "senben", "feed"].includes(project?.type);
     document.body.className = isVisualCase ? "case-page" : "project-page";
     return () => {
       document.body.className = "";
@@ -19,7 +23,7 @@ export default function ProjectPage({ slug, navigate }) {
   }, [project]);
 
   useEffect(() => {
-    const scrollTop = () => window.scrollTo({ top: 0, left: 0, behavior: "auto" });
+    const scrollTop = () => scrollPageToTop();
     scrollTop();
     const frameId = requestAnimationFrame(scrollTop);
     const timerId = window.setTimeout(scrollTop, 80);
@@ -52,17 +56,23 @@ export default function ProjectPage({ slug, navigate }) {
     navigate("/?restoreProjectScroll=1");
   };
 
+  let content;
   if (project.type === "case") {
-    return <CaseProject project={project} onBack={handleCaseBack} />;
+    content = <CaseProject project={project} onBack={handleCaseBack} />;
+  } else if (project.type === "senben") {
+    content = <SenbenProject project={project} onBack={handleCaseBack} />;
+  } else if (project.type === "feed") {
+    content = <ProjectImageFeed project={project} onBack={handleCaseBack} />;
+  } else {
+    content = <ProjectDetail project={project} />;
   }
 
-  if (project.type === "senben") {
-    return <SenbenProject project={project} onBack={handleCaseBack} />;
-  }
-
-  if (project.type === "feed") {
-    return <ProjectImageFeed project={project} onBack={handleCaseBack} />;
-  }
-
-  return <ProjectDetail project={project} />;
+  return (
+    <>
+      <ProjectReadingProgress />
+      {isVisualCase ? <CaseBackLink onBack={handleCaseBack} /> : null}
+      {content}
+      <ProjectBackToTop variant={project.type === "feed" ? "feed" : undefined} />
+    </>
+  );
 }

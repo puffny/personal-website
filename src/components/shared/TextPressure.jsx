@@ -13,12 +13,14 @@ const getAttr = (distance, maxDist, minVal, maxVal) => {
 
 const debounce = (func, delay) => {
   let timeoutId;
-  return (...args) => {
+  const debounced = (...args) => {
     clearTimeout(timeoutId);
     timeoutId = setTimeout(() => {
       func.apply(this, args);
     }, delay);
   };
+  debounced.cancel = () => clearTimeout(timeoutId);
+  return debounced;
 };
 
 export default function TextPressure({
@@ -102,7 +104,10 @@ export default function TextPressure({
     const debouncedSetSize = debounce(setSize, 100);
     debouncedSetSize();
     window.addEventListener("resize", debouncedSetSize);
-    return () => window.removeEventListener("resize", debouncedSetSize);
+    return () => {
+      window.removeEventListener("resize", debouncedSetSize);
+      debouncedSetSize.cancel?.();
+    };
   }, [setSize]);
 
   useEffect(() => {
@@ -126,7 +131,7 @@ export default function TextPressure({
 
           const distance = dist(mouseRef.current, charCenter);
           const wdth = width ? Math.floor(getAttr(distance, maxDist, 5, 200)) : 100;
-          const wght = weight ? Math.floor(getAttr(distance, maxDist, 200, 600)) : 400;
+          const wght = weight ? Math.floor(getAttr(distance, maxDist, 200, 400)) : 400;
           const italVal = italic ? getAttr(distance, maxDist, 0, 1).toFixed(2) : 0;
           const alphaVal = alpha ? getAttr(distance, maxDist, 0, 1).toFixed(2) : 1;
           const newFontVariationSettings = `'wght' ${wght}, 'wdth' ${wdth}, 'ital' ${italVal}`;

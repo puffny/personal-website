@@ -27,7 +27,9 @@ export default function SelectedWorksSection() {
                   aria-label={`View ${title} project`}
                 >
                   <span className="selected-work-visual">
-                    <img src={work.image} alt={work.imageAlt} loading="lazy" />
+                    <span className="selected-work-parallax-layer">
+                      <img src={work.image} alt={work.imageAlt} loading="lazy" />
+                    </span>
                   </span>
                 </a>
                 <div className="selected-work-copy">
