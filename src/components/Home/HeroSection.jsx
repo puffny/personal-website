@@ -2,26 +2,37 @@ import { useEffect, useState } from "react";
 import { siteData } from "../../data/siteData";
 import SplitText from "../shared/SplitText";
 
+const heroCopyRevealDelayMs = 120;
+
 export default function HeroSection() {
   const { person, heroStats } = siteData;
   const heroScope = heroStats[2];
   const [introReady, setIntroReady] = useState(false);
 
   useEffect(() => {
-    if (document.body.classList.contains("intro-complete")) {
-      setIntroReady(true);
-      return undefined;
+    let revealTimer = 0;
+    const revealHeroCopy = () => {
+      window.clearTimeout(revealTimer);
+      revealTimer = window.setTimeout(() => setIntroReady(true), heroCopyRevealDelayMs);
+    };
+
+    if (document.body.classList.contains("intro-content-ready")) {
+      revealHeroCopy();
+      return () => window.clearTimeout(revealTimer);
     }
 
     const observer = new MutationObserver(() => {
-      if (document.body.classList.contains("intro-complete")) {
-        setIntroReady(true);
+      if (document.body.classList.contains("intro-content-ready")) {
+        revealHeroCopy();
         observer.disconnect();
       }
     });
 
     observer.observe(document.body, { attributes: true, attributeFilter: ["class"] });
-    return () => observer.disconnect();
+    return () => {
+      observer.disconnect();
+      window.clearTimeout(revealTimer);
+    };
   }, []);
 
   return (
@@ -33,7 +44,7 @@ export default function HeroSection() {
           <span className="site-logo-pulse" aria-hidden="true" />
           <img src={person.logoSrc} alt="Puffny" />
         </a>
-        <a className="pill-button" href={person.resumeHref} download>
+        <a className="pill-button" href={person.resumeHref} download="梁慧锋-UI设计个人简历.pdf">
           下载PDF简历
         </a>
       </div>

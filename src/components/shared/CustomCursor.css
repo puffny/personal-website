@@ -11,7 +11,8 @@
   }
 
   .selected-work-visual-link,
-  .selected-work-visual-link * {
+  .selected-work-visual-link *,
+  .final-contact-list p {
     cursor: pointer;
   }
 }

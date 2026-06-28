@@ -1,17 +1,35 @@
 import { useEffect } from "react";
+import { jumpToPageY } from "../utils/pageScroll";
 
 const projectScrollKey = "liangPortfolioProjectScrollY";
 
 function restoreProjectScroll(savedScrollY) {
-  const restore = () => window.scrollTo({ top: savedScrollY, left: 0, behavior: "auto" });
-  requestAnimationFrame(() => {
+  let isActive = true;
+  let frameId = 0;
+  let secondFrameId = 0;
+  let timerId = 0;
+  const restore = () => {
+    if (!isActive || window.location.pathname !== "/") return;
+    jumpToPageY(savedScrollY);
+  };
+
+  frameId = requestAnimationFrame(() => {
     restore();
-    requestAnimationFrame(() => {
+    secondFrameId = requestAnimationFrame(() => {
       restore();
-      window.history.replaceState(null, "", window.location.pathname);
+      if (isActive && window.location.pathname === "/") {
+        window.history.replaceState(null, "", window.location.pathname);
+      }
     });
   });
-  window.setTimeout(restore, 120);
+  timerId = window.setTimeout(restore, 120);
+
+  return () => {
+    isActive = false;
+    cancelAnimationFrame(frameId);
+    cancelAnimationFrame(secondFrameId);
+    window.clearTimeout(timerId);
+  };
 }
 
 export function useProjectScrollMemory() {
@@ -26,14 +44,16 @@ export function useProjectScrollMemory() {
     });
 
     const params = new URLSearchParams(window.location.search);
+    let cancelRestoreProjectScroll = () => {};
     if (params.get("restoreProjectScroll") === "1") {
       const savedScrollY = Number(sessionStorage.getItem(projectScrollKey));
       if (Number.isFinite(savedScrollY)) {
-        restoreProjectScroll(savedScrollY);
+        cancelRestoreProjectScroll = restoreProjectScroll(savedScrollY);
       }
     }
 
     return () => {
+      cancelRestoreProjectScroll();
       projectLinks.forEach((projectLink) => {
         projectLink.removeEventListener("click", rememberScroll);
       });

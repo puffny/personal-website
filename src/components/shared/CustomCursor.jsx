@@ -37,7 +37,10 @@ export default function CustomCursor() {
     const handlePointerMove = (event) => {
       targetX = event.clientX;
       targetY = event.clientY;
-      cursor.classList.toggle("custom-cursor--native", Boolean(event.target.closest(".selected-work-visual-link")));
+      cursor.classList.toggle(
+        "custom-cursor--native",
+        Boolean(event.target.closest(".selected-work-visual-link, .final-contact-list p")),
+      );
       if (!hasPointer) {
         hasPointer = true;
         currentX = targetX;

@@ -20,7 +20,6 @@ export function useRevealInteractions() {
       ".selected-project",
       ".thinking-article > *",
       ".article-figure img",
-      ".final-contact",
       ".skill-group span",
       ".tool-grid span",
       ".info-columns > div",
@@ -28,7 +27,13 @@ export function useRevealInteractions() {
       ".career-timeline article",
     ]
       .flatMap((selector) => Array.from(document.querySelectorAll(selector)))
-      .filter((element, index, elements) => elements.indexOf(element) === index && !element.closest("#ai-lab")));
+      .filter(
+        (element, index, elements) =>
+          elements.indexOf(element) === index &&
+          !element.closest(".final-contact-section") &&
+          !element.closest("#ai-lab") &&
+          (!element.closest("#core") || element.matches("#core .content-main h2")),
+      ));
 
     revealTargets.forEach((element, index) => {
       element.classList.add("reveal-item");

@@ -2,16 +2,16 @@ import { useEffect } from "react";
 
 export function useContactCopy() {
   useEffect(() => {
-    const contactItems = Array.from(document.querySelectorAll(".contact-grid > a, .contact-grid > p")).filter(
-      (item) => !item.closest(".hero-scope-note"),
-    );
+    const contactItems = Array.from(
+      document.querySelectorAll(".contact-grid > a, .contact-grid > p, .final-contact-list p"),
+    ).filter((item) => !item.closest(".hero-scope-note"));
     if (!contactItems.length) return;
 
     const toast = document.createElement("div");
     toast.className = "copy-toast";
     toast.setAttribute("role", "status");
     toast.setAttribute("aria-live", "polite");
-    toast.textContent = "复制成功";
+    toast.textContent = "已复制";
     document.body.appendChild(toast);
 
     let toastTimer;

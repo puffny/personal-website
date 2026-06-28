@@ -14,15 +14,18 @@ export default function CoreSection() {
   const { coreStrengths } = siteData;
   const sectionRef = useRef(null);
   const [activeIndex, setActiveIndex] = useState(0);
+  const [isStaticLayout, setIsStaticLayout] = useState(() =>
+    window.matchMedia("(max-width: 760px), (prefers-reduced-motion: reduce)").matches,
+  );
 
   useEffect(() => {
     const section = sectionRef.current;
     if (!section) return undefined;
 
-    const reduceMotion = window.matchMedia(
-      "(prefers-reduced-motion: reduce)",
-    ).matches;
+    const desktopQuery = window.matchMedia("(min-width: 761px)");
+    const reduceMotionQuery = window.matchMedia("(prefers-reduced-motion: reduce)");
     const itemCount = coreStrengths.items.length;
+    let ctx;
 
     const updateFromProgress = (progress) => {
       const clampedProgress = Math.min(0.999, Math.max(0, progress));
@@ -36,31 +39,54 @@ export default function CoreSection() {
       );
     };
 
-    if (reduceMotion) {
-      updateFromProgress(0);
-      return undefined;
-    }
+    const setupCoreScroll = () => {
+      ctx?.revert();
 
-    const ctx = gsap.context(() => {
-      const trigger = ScrollTrigger.create({
-        trigger: section,
-        start: "top 50%",
-        end: "bottom 70%",
-        scrub: true,
-        // markers: true,
-        invalidateOnRefresh: true,
-        onUpdate: (self) => updateFromProgress(self.progress),
-        onRefresh: (self) => updateFromProgress(self.progress),
-      });
+      const shouldUseStaticLayout = !desktopQuery.matches || reduceMotionQuery.matches;
+      setIsStaticLayout(shouldUseStaticLayout);
 
-      updateFromProgress(trigger.progress);
-    }, section);
+      if (shouldUseStaticLayout) {
+        section.style.setProperty("--core-progress", "1");
+        setActiveIndex(0);
+        ctx = undefined;
+        return;
+      }
 
-    return () => ctx.revert();
+      section.style.setProperty("--core-progress", "0");
+      setActiveIndex(0);
+
+      ctx = gsap.context(() => {
+        const trigger = ScrollTrigger.create({
+          trigger: section,
+          start: "top 50%",
+          end: "bottom 70%",
+          scrub: true,
+          invalidateOnRefresh: true,
+          onUpdate: (self) => updateFromProgress(self.progress),
+          onRefresh: (self) => updateFromProgress(self.progress),
+        });
+
+        updateFromProgress(trigger.progress);
+      }, section);
+    };
+
+    setupCoreScroll();
+    desktopQuery.addEventListener("change", setupCoreScroll);
+    reduceMotionQuery.addEventListener("change", setupCoreScroll);
+
+    return () => {
+      desktopQuery.removeEventListener("change", setupCoreScroll);
+      reduceMotionQuery.removeEventListener("change", setupCoreScroll);
+      ctx?.revert();
+    };
   }, [coreStrengths.items.length]);
 
   return (
-    <section className="content-shell core-section" id="core" ref={sectionRef}>
+    <section
+      className={`content-shell core-section${isStaticLayout ? " core-static-layout" : ""}`}
+      id="core"
+      ref={sectionRef}
+    >
       <div className="content-main core-scroll-stage">
         <div className="core-pin-frame">
           <div className="core-sticky-stage">
@@ -85,7 +111,7 @@ export default function CoreSection() {
                 return (
                   <article
                     className={`core-slide core-slide-${slideState}${isActive ? " core-active-slide" : ""}`}
-                    aria-hidden={!isActive}
+                    aria-hidden={!isStaticLayout && !isActive}
                     key={item.index}
                   >
                     <div className="core-slide-copy">
