@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useLayoutEffect } from "react";
 import { jumpToPageY } from "../utils/pageScroll";
 
 const projectScrollKey = "liangPortfolioProjectScrollY";
@@ -11,7 +11,10 @@ function restoreProjectScroll(savedScrollY) {
   const restore = () => {
     if (!isActive || window.location.pathname !== "/") return;
     jumpToPageY(savedScrollY);
+    window.dispatchEvent(new Event("scroll"));
   };
+
+  restore();
 
   frameId = requestAnimationFrame(() => {
     restore();
@@ -33,7 +36,7 @@ function restoreProjectScroll(savedScrollY) {
 }
 
 export function useProjectScrollMemory() {
-  useEffect(() => {
+  useLayoutEffect(() => {
     const projectLinks = Array.from(document.querySelectorAll(".selected-project, .selected-work-visual-link"));
     const rememberScroll = () => {
       sessionStorage.setItem(projectScrollKey, String(window.scrollY));

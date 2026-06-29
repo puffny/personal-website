@@ -38,6 +38,7 @@ export default function TextPressure({
   strokeColor = "#FF0000",
   className = "",
   minFontSize = 24,
+  disabled = false,
 }) {
   const containerRef = useRef(null);
   const titleRef = useRef(null);
@@ -50,6 +51,8 @@ export default function TextPressure({
   const chars = useMemo(() => text.split(""), [text]);
 
   useEffect(() => {
+    if (disabled) return undefined;
+
     const handleMouseMove = (event) => {
       cursorRef.current.x = event.clientX;
       cursorRef.current.y = event.clientY;
@@ -76,7 +79,7 @@ export default function TextPressure({
       window.removeEventListener("mousemove", handleMouseMove);
       window.removeEventListener("touchmove", handleTouchMove);
     };
-  }, []);
+  }, [disabled]);
 
   const setSize = useCallback(() => {
     if (!containerRef.current || !titleRef.current) return;
@@ -112,6 +115,17 @@ export default function TextPressure({
 
   useEffect(() => {
     let rafId;
+    if (disabled) {
+      spansRef.current.forEach((span) => {
+        if (!span) return;
+        span.style.fontVariationSettings = "'wght' 400, 'wdth' 100, 'ital' 0";
+        if (alpha) {
+          span.style.opacity = 1;
+        }
+      });
+      return undefined;
+    }
+
     const animate = () => {
       mouseRef.current.x += (cursorRef.current.x - mouseRef.current.x) / 15;
       mouseRef.current.y += (cursorRef.current.y - mouseRef.current.y) / 15;
@@ -150,7 +164,7 @@ export default function TextPressure({
 
     animate();
     return () => cancelAnimationFrame(rafId);
-  }, [width, weight, italic, alpha]);
+  }, [width, weight, italic, alpha, disabled]);
 
   const styleElement = useMemo(
     () => (

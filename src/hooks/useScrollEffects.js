@@ -10,8 +10,17 @@ export function useScrollEffects(activeSectionIds = ["home", "summary"]) {
     const homeNavIcon = homeNavItem?.querySelector("i");
     const homeNavText = homeNavItem?.querySelector(".nav-text");
     const finalContactSection = document.querySelector(".final-contact-section");
+    const pageBg = document.querySelector(".page-bg");
+    const pageBgVideo = document.querySelector(".page-bg-video");
     const sections = activeSectionIds.map((id) => document.getElementById(id)).filter(Boolean);
     let hasPlayedBackToTopHint = false;
+    let wasScrolled = document.body.classList.contains("page-scrolled");
+    const shouldRestoreProjectScroll = new URLSearchParams(window.location.search).get("restoreProjectScroll") === "1";
+    let isRestoringProjectScroll = shouldRestoreProjectScroll;
+
+    const getActualScrolledState = () => {
+      return window.scrollY > window.innerHeight * 0.3;
+    };
 
     const moveNavIndicator = () => {
       if (!nav || !navIndicator) return;
@@ -49,14 +58,34 @@ export function useScrollEffects(activeSectionIds = ["home", "summary"]) {
 
     const updateHeroScrollState = () => {
       if (!hero) return;
-      const isScrolled = window.scrollY > window.innerHeight * 0.3;
-      const isPastHero = window.scrollY > window.innerHeight * 0.3;
+      const actualScrolled = getActualScrolledState();
+      const isScrolled = actualScrolled || isRestoringProjectScroll;
+      const isPastHero = isScrolled;
       const finalContactTop = finalContactSection?.getBoundingClientRect().top ?? Number.POSITIVE_INFINITY;
       const isFinalContactVisible = finalContactTop <= window.innerHeight * 0.52;
       hero.classList.toggle("scrolled", isScrolled);
       document.body.classList.toggle("page-scrolled", isScrolled);
       document.body.classList.toggle("final-contact-visible", isFinalContactVisible);
       document.body.classList.toggle("nav-visible", isPastHero);
+
+      if (pageBgVideo) {
+        const returnedToHero = wasScrolled && !isScrolled;
+        if (isScrolled && !pageBgVideo.paused) {
+          pageBgVideo.pause();
+        } else if (!isScrolled) {
+          if (returnedToHero) {
+            pageBg?.classList.remove("page-bg-start-static");
+            pageBgVideo.currentTime = 0;
+          }
+          if (returnedToHero || pageBgVideo.paused) {
+            pageBgVideo.play().catch(() => {});
+          }
+        }
+      }
+      wasScrolled = isScrolled;
+      if (isRestoringProjectScroll && actualScrolled) {
+        isRestoringProjectScroll = false;
+      }
     };
 
     const updateActiveFromScroll = () => {

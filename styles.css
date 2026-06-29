@@ -91,6 +91,9 @@ body.case-page main {
 }
 
 .page-bg {
+  --static-bg: url("/assets/hero-background-blur.png");
+  --bg-scroll-zoom: 0;
+  --bg-media-scale: calc(var(--parallax-bg-scale) + var(--bg-scroll-zoom));
   position: fixed;
   inset: 0;
   z-index: 0;
@@ -98,25 +101,48 @@ body.case-page main {
   overflow: hidden;
   background: #050505;
   filter: none;
-  transform: scale(var(--parallax-bg-scale));
+}
+
+.page-bg::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  background-image: var(--static-bg);
+  background-position: center center;
+  background-size: cover;
+  opacity: 0;
+  transform: scale(var(--bg-media-scale));
+  transform-origin: center center;
   transition:
-    filter 0.8s ease,
+    opacity 0.75s ease,
     transform 0.8s ease;
-  will-change: filter, transform;
+  will-change: opacity, transform;
 }
 
 .page-bg video {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
   display: block;
   width: 100%;
   height: 100%;
   object-fit: cover;
   object-position: center center;
+  opacity: 1;
+  transform: scale(var(--bg-media-scale));
+  transform-origin: center center;
+  transition:
+    opacity 0.75s ease,
+    transform 0.8s ease;
+  will-change: opacity, transform;
 }
 
 .page-bg::after {
   content: "";
   position: absolute;
   inset: 0;
+  z-index: 2;
   background: radial-gradient(
     ellipse at center,
     rgba(0, 0, 0, 0) 42%,
@@ -129,18 +155,24 @@ body.case-page main {
 }
 
 .home-page.page-scrolled .page-bg {
-  filter: blur(48px);
-  transform: scale(calc(var(--parallax-bg-scale) + 0.06));
+  --bg-scroll-zoom: 0.06;
 }
 
-.home-page.page-scrolled .page-bg::after {
-  background:
-    linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)),
-    radial-gradient(
-      ellipse at center,
-      rgba(0, 0, 0, 0) 42%,
-      rgba(0, 0, 0, 0.58) 100%
-    );
+.home-page.page-scrolled .page-bg::before,
+.page-bg-start-static::before,
+.page-bg-static::before {
+  opacity: 1;
+}
+
+.home-page.page-scrolled .page-bg video,
+.page-bg-start-static video {
+  opacity: 0;
+}
+
+.home-page.page-scrolled .page-bg::after,
+.page-bg-start-static::after,
+.page-bg-static::after {
+  opacity: 0;
 }
 
 .home-page main {
@@ -2021,7 +2053,7 @@ p {
   position: relative;
   height: clamp(260px, 31vw, 380px);
   margin-top: 0px;
-  overflow: hidden;
+  overflow: visible;
   filter: none;
 }
 
@@ -2827,8 +2859,7 @@ li::before {
 }
 
 .case-page .page-bg {
-  filter: blur(48px);
-  transform: scale(1.06);
+  --bg-scroll-zoom: 0.06;
 }
 
 .case-page .page-bg::after {
@@ -3587,26 +3618,27 @@ li::before {
 
   .hero-copy {
     left: 24px;
-    top: clamp(210px, calc(50svh - 10px), 380px);
+    top: clamp(210px, calc(50svh - 10px), 340px);
     translate: 0 0;
     width: calc(100% - 48px);
   }
 
   .hero h1 {
-    font-size: 56px;
+    font-size: 52px;
     line-height: 0.9;
     margin-bottom: 16px;
   }
 
   .eyebrow {
-    font-size: 20px;
-    margin-bottom: 10px;
+    font-size: 16px;
+    margin-bottom: 0px;
   }
 
   .hero-subtitle {
-    font-size: 16px;
+    font-size: 14px;
     line-height: 1.55;
     overflow-wrap: anywhere;
+    width: 66%;
   }
 
   .about-stats {
@@ -3629,7 +3661,7 @@ li::before {
     gap: 13px;
     bottom: clamp(64px, 14vh, 80px);
     padding-top: 0;
-    font-size: 15px;
+    font-size: 14px;
   }
 
   .contact-grid > a,
@@ -3963,7 +3995,7 @@ li::before {
 
   .core-slide-track {
     display: grid;
-    gap: 42px;
+    gap: 0px;
     min-height: 0;
   }
 
@@ -4005,7 +4037,7 @@ li::before {
 
   .core-slide-copy div > p {
     max-width: none;
-    font-size: 15px;
+    font-size: 14px;
     line-height: 1.68;
   }
 
@@ -4013,11 +4045,11 @@ li::before {
     justify-self: center;
     width: 100%;
     max-width: 100%;
-    min-width: 0;
+    min-width: 120%;
   }
 
   .selected-works-section {
-    padding-top: 158px;
+    padding-top: 16px;
   }
 
   .selected-works-head {
@@ -4072,6 +4104,7 @@ li::before {
 
   .selected-work-result {
     margin-top: 28px;
+    font-size: 13px;
   }
 
   .selected-work-metric {
@@ -4145,7 +4178,7 @@ li::before {
     left: 0;
     top: 0;
     width: 10px;
-    height: calc(100% - 8px);
+    height: calc(100% - 94px);
     z-index: 0;
   }
 
@@ -4199,7 +4232,7 @@ li::before {
 
   .ai-lab-step h3,
   .ai-lab-tool {
-    font-size: clamp(16px, 4.5vw, 20px);
+    font-size: clamp(16px, 3.5vw, 20px);
   }
 
   .ai-lab-step p {
