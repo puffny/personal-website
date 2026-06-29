@@ -3,10 +3,7 @@ import BackgroundVideo from "../shared/BackgroundVideo";
 export default function SenbenProject({ project }) {
   return (
     <>
-      <BackgroundVideo
-        src="/assets/hero-background.mp4"
-        sourceType="video/mp4"
-      />
+      <BackgroundVideo staticOnly />
       <main className="senben-page">
         <header className="senben-hero">
           <p className="eyebrow">{project.eyebrow}</p>

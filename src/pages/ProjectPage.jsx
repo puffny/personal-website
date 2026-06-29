@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useLayoutEffect } from "react";
 import { siteData } from "../data/siteData";
 import { useRevealInteractions } from "../hooks/useRevealInteractions";
 import { useScrollEffects } from "../hooks/useScrollEffects";
@@ -10,15 +10,18 @@ import ProjectBackToTop from "../components/Project/ProjectBackToTop";
 import ProjectImageFeed from "../components/Project/ProjectImageFeed";
 import ProjectReadingProgress from "../components/Project/ProjectReadingProgress";
 import SenbenProject from "../components/Project/SenbenProject";
+import BackgroundVideo from "../components/shared/BackgroundVideo";
 
 export default function ProjectPage({ slug, navigate }) {
   const project = siteData.projects[slug];
   const isVisualCase = ["case", "senben", "feed"].includes(project?.type);
 
-  useEffect(() => {
-    document.body.className = isVisualCase ? "case-page" : "project-page";
+  useLayoutEffect(() => {
+    const pageClassName = isVisualCase ? "case-page" : "project-page";
+    document.body.classList.remove("home-page", "intro-running", "intro-complete", "intro-content-ready", "page-scrolled", "nav-visible", "final-contact-visible");
+    document.body.classList.add(pageClassName);
     return () => {
-      document.body.className = "";
+      document.body.classList.remove(pageClassName);
     };
   }, [project]);
 
@@ -70,6 +73,7 @@ export default function ProjectPage({ slug, navigate }) {
   return (
     <>
       <ProjectReadingProgress />
+      {isVisualCase ? null : <BackgroundVideo staticOnly />}
       {isVisualCase ? <CaseBackLink onBack={handleCaseBack} /> : null}
       {content}
       <ProjectBackToTop variant={project.type === "feed" ? "feed" : undefined} />

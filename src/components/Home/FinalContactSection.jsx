@@ -1,4 +1,4 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { siteData } from "../../data/siteData";
@@ -15,12 +15,26 @@ export default function FinalContactSection() {
   const { contact } = siteData;
   const sectionRef = useRef(null);
   const containerRef = useRef(null);
+  const [disableThanksInteraction, setDisableThanksInteraction] = useState(false);
   const contactItems = [
     contact.email,
     contact.phone,
     contact.location,
     contact.website,
   ];
+
+  useLayoutEffect(() => {
+    const mediaQuery = window.matchMedia("(hover: none), (pointer: coarse), (max-width: 760px)");
+    const updateInteractionMode = () => {
+      setDisableThanksInteraction(mediaQuery.matches);
+    };
+
+    updateInteractionMode();
+    mediaQuery.addEventListener("change", updateInteractionMode);
+    return () => {
+      mediaQuery.removeEventListener("change", updateInteractionMode);
+    };
+  }, []);
 
   useEffect(() => {
     const section = sectionRef.current;
@@ -110,6 +124,7 @@ export default function FinalContactSection() {
               italic
               textColor="#fff"
               minFontSize={96}
+              disabled={disableThanksInteraction}
             />
           </h2>
           <address

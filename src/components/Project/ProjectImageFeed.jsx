@@ -3,7 +3,7 @@ import BackgroundVideo from "../shared/BackgroundVideo";
 export default function ProjectImageFeed({ project }) {
   return (
     <>
-      <BackgroundVideo src="/assets/hero-background.mp4" sourceType="video/mp4" />
+      <BackgroundVideo staticOnly />
       <main className="project-feed-page">
         <section className="project-image-feed" aria-label={project.ariaLabel}>
           {project.feedImages.map((image, index) => (

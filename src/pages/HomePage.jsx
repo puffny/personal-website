@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useLayoutEffect } from "react";
 import { siteData } from "../data/siteData";
 import { useContactCopy } from "../hooks/useContactCopy";
 import { shouldSkipIntroLoader, useIntroLoader } from "../hooks/useIntroLoader";
@@ -18,10 +18,17 @@ import SiteNav from "../components/Home/SiteNav";
 import BackgroundVideo from "../components/shared/BackgroundVideo";
 
 export default function HomePage() {
-  useEffect(() => {
-    document.body.className = shouldSkipIntroLoader() ? "home-page intro-complete" : "home-page intro-running";
+  const shouldRestoreProjectScroll = new URLSearchParams(window.location.search).get("restoreProjectScroll") === "1";
+
+  useLayoutEffect(() => {
+    const introClassName = shouldSkipIntroLoader() ? "intro-complete" : "intro-running";
+    document.body.classList.remove("project-page", "case-page", "intro-running", "intro-complete");
+    document.body.classList.add("home-page", introClassName);
+    if (shouldRestoreProjectScroll) {
+      document.body.classList.add("page-scrolled", "nav-visible");
+    }
     return () => {
-      document.body.className = "";
+      document.body.classList.remove("home-page", "intro-running", "intro-complete", "intro-content-ready", "page-scrolled", "nav-visible", "final-contact-visible");
     };
   }, []);
 
@@ -34,7 +41,7 @@ export default function HomePage() {
 
   return (
     <>
-      <BackgroundVideo src={siteData.person.backgroundVideo} />
+      <BackgroundVideo src={siteData.person.backgroundVideo} startStatic={shouldRestoreProjectScroll} />
       <IntroLoader />
       <SiteNav />
       <ScrollCue />
