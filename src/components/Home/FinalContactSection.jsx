@@ -71,11 +71,14 @@ export default function FinalContactSection() {
         "--final-reveal-contact-y",
         -12,
       );
+      const footerRevealEnd = window.matchMedia("(max-width: 760px)").matches
+        ? "bottom 105%"
+        : "bottom bottom";
       const footerReveal = gsap.timeline({
         scrollTrigger: {
           trigger: section,
           start: "top bottom",
-          end: "bottom bottom",
+          end: footerRevealEnd,
           scrub: true,
           invalidateOnRefresh: true,
         },

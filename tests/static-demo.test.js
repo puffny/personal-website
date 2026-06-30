@@ -44,6 +44,9 @@ assert(packageJson.dependencies.gsap, "Expected GSAP dependency for scroll-linke
 includesAll("src/hooks/useSmoothScroll.js", [
   "lenis.on(\"scroll\", updateScrollTriggers)",
   "ScrollTrigger.update()",
+  "shouldUseNativeScroll",
+  "window.matchMedia(\"(max-width: 760px)\").matches",
+  "if (reduceMotion || shouldUseNativeScroll)",
   "gsap.ticker.add(raf)",
   "lenis.raf(time * 1000)",
   "gsap.ticker.lagSmoothing(0)",
@@ -312,7 +315,7 @@ includesAll("src/hooks/useIntroLoader.js", [
   "document.body.classList.remove(\"intro-running\")",
   "document.body.classList.add(\"intro-complete\")",
   "document.body.classList.add(\"intro-content-ready\")",
-  "duration + 500 - introContentReadyLeadMs",
+  "revealDuration - introContentReadyLeadMs",
   "completeIntroState();",
   "if (!introLoader || !introPercent || !introIcon || !introLoaderLine)",
   "introIconChangeIntervalMs = 680",
@@ -388,8 +391,37 @@ assert(!revealVisibleBlock.includes("filter:"), "Global reveal should no longer 
 
 includesAll("styles.css", [
   ".hero-copy",
-  "top: clamp(210px, calc(50svh - 10px), 380px);",
+  "top: clamp(210px, calc(50svh - 10px), 340px);",
+  ".hero h1",
+  "0 4px 12px rgba(0, 0, 0, 0.16)",
+  ".hero-subtitle",
+  "font-weight: 500;",
+  "0 3px 10px rgba(0, 0, 0, 0.16)",
+  ".hero-scope-note p",
+  "text-shadow: 0 3px 10px rgba(0, 0, 0, 0.16);",
 ]);
+
+includesAll("src/hooks/useIntroLoader.js", [
+  "document.querySelector(\".page-bg-video\")",
+  "videoReady",
+  "maxWaitingProgress = 0.98",
+  "loadeddata",
+  "canplay",
+  "introPanelExitMs = 680",
+  "introRevealDelayMs = 620",
+  "introLoader.classList.add(\"is-loading-complete\")",
+  "introLoader.classList.add(\"is-revealing\")",
+]);
+
+includesAll("styles.css", [
+  ".intro-loader.is-loading-complete .intro-loader-panel",
+  ".intro-loader.is-revealing .intro-black-cover",
+  ".intro-loader.is-revealing .intro-ux-scale",
+  ".intro-loader:not(.is-revealing) .intro-black-cover",
+]);
+
+assert(!read("src/hooks/useSmoothScroll.js").includes("pointer: coarse"), "Desktop Lenis should not be disabled just because a device exposes a coarse pointer");
+assert(!read("src/hooks/useSmoothScroll.js").includes("hover: none"), "Desktop Lenis should not be disabled just because hover is unavailable");
 
 assert(!read("src/hooks/useRevealInteractions.js").includes("--reveal-scale"), "Layered reveal should not scale content modules");
 assert(!read("styles.css").includes("scale(var(--reveal-scale)"), "Reveal transform should not scale content modules");
@@ -561,7 +593,9 @@ includesAll("src/components/Home/FinalContactSection.jsx", [
   "--final-reveal-contact-y",
   "trigger: section",
   "start: \"top bottom\"",
-  "end: \"bottom bottom\"",
+  "footerRevealEnd",
+  "bottom 105%",
+  "bottom bottom",
 ]);
 
 assert(!read("src/pages/HomePage.jsx").includes("final-transition"), "Final Contact should not use the local final transition wrapper after rollback");
@@ -571,12 +605,21 @@ includesAll("src/components/shared/TextPressure.jsx", [
   "mousemove",
   "touchmove",
   "Roboto Flex",
-  "https://fonts.googleapis.com/css2?family=Roboto+Flex",
+  "/vendor/fonts/roboto-flex/roboto-flex.css",
   "@import url('${fontUrl}')",
   "text-pressure-title",
   "data-char",
   "spansRef.current[index]",
 ]);
+
+includesAll("index.html", [
+  "/vendor/fonts/albert-sans/albert-sans.css",
+  "/vendor/phosphor/phosphor-regular.css",
+  "/vendor/phosphor/phosphor-fill.css",
+]);
+
+assert(!read("index.html").includes("fonts.googleapis.com"), "Index should load Albert Sans from local vendor assets");
+assert(!read("index.html").includes("cdn.jsdelivr.net/npm/@phosphor-icons"), "Index should load Phosphor icons from local vendor assets");
 
 includesAll("src/hooks/useScrollEffects.js", [
   "finalContactSection",
@@ -619,12 +662,16 @@ includesAll("styles.css", [
   "align-self: end;",
 ]);
 
-const mobileFinalContactSectionBlock = read("styles.css").match(/\.final-contact-section\s*{[\s\S]*?height: 44svh;[\s\S]*?\n  }/)?.[0] || "";
+const mobileFinalContactSectionBlock = read("styles.css").match(/\.final-contact-section\s*{[\s\S]*?max-width: none;[\s\S]*?min-height: 0;[\s\S]*?\n  }/)?.[0] || "";
 assert(
   mobileFinalContactSectionBlock.includes("width: 100%;") &&
     mobileFinalContactSectionBlock.includes("max-width: none;") &&
-    mobileFinalContactSectionBlock.includes("margin: 0;"),
-  "Final contact section should override mobile content-shell width so its background fills the viewport",
+    mobileFinalContactSectionBlock.includes("margin: 0;") &&
+    mobileFinalContactSectionBlock.includes("height: auto;") &&
+    mobileFinalContactSectionBlock.includes("min-height: 0;") &&
+    mobileFinalContactSectionBlock.includes("--final-reveal-container-y: -24;") &&
+    mobileFinalContactSectionBlock.includes("isolation: isolate;"),
+  "Final contact section should fill the viewport width on mobile while letting content define height",
 );
 
 assert(!read("styles.css").includes(".final-thanks .text-pressure-char:last-child"), "Final THANKS period should render as text, not a yellow square");

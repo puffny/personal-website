@@ -364,7 +364,15 @@ body.case-page main {
   inset: 0;
   z-index: 1;
   pointer-events: none;
-  animation: introCoverExit 3.6s linear forwards;
+  animation: none;
+}
+
+.intro-loader:not(.is-revealing) .intro-black-cover {
+  opacity: 1;
+}
+
+.intro-loader.is-revealing .intro-black-cover {
+  animation: introCoverExit 1.75s linear forwards;
 }
 
 .intro-cover-svg {
@@ -376,7 +384,12 @@ body.case-page main {
 .intro-ux-scale {
   transform-box: view-box;
   transform-origin: 48.2% 54.8%;
-  animation: introUxViewport 3.6s cubic-bezier(0.7, 0, 0.12, 1) forwards;
+  transform: scale(0);
+  animation: none;
+}
+
+.intro-loader.is-revealing .intro-ux-scale {
+  animation: introUxViewport 1.75s cubic-bezier(0.7, 0, 0.12, 1) forwards;
 }
 
 .intro-mask-ux {
@@ -396,7 +409,12 @@ body.case-page main {
   gap: 10px;
   transform: translate(-50%, -50%);
   color: rgba(247, 247, 243, 0.92);
-  animation: introPanelExit 3.6s ease forwards;
+  animation: none;
+  visibility: visible;
+}
+
+.intro-loader.is-loading-complete .intro-loader-panel {
+  animation: introPanelExit 0.68s cubic-bezier(0.22, 1, 0.36, 1) forwards;
 }
 
 .intro-loader-row {
@@ -497,20 +515,15 @@ body.case-page main {
 }
 
 @keyframes introUxViewport {
-  0%,
-  52% {
-    transform: scale(0);
-  }
-
-  52.1% {
+  0% {
     transform: scale(1);
   }
 
-  66% {
+  29% {
     transform: scale(2.35);
   }
 
-  70% {
+  38% {
     transform: scale(2.35);
   }
 
@@ -532,16 +545,32 @@ body.case-page main {
 }
 
 @keyframes introPanelExit {
-  0%,
-  50% {
+  0% {
     opacity: 1;
+    filter: blur(0);
     transform: translate(-50%, -50%) scale(1);
+    visibility: visible;
   }
 
-  60%,
+  42% {
+    opacity: 0.68;
+    filter: blur(1.5px);
+    transform: translate(-50%, calc(-50% - 8px)) scale(0.98);
+    visibility: visible;
+  }
+
+  92% {
+    opacity: 0;
+    filter: blur(7px);
+    transform: translate(-50%, calc(-50% - 22px)) scale(0.94);
+    visibility: visible;
+  }
+
   100% {
     opacity: 0;
-    transform: translate(-50%, calc(-50% - 8px)) scale(0.96);
+    filter: blur(7px);
+    transform: translate(-50%, calc(-50% - 22px)) scale(0.94);
+    visibility: hidden;
   }
 }
 
@@ -966,6 +995,7 @@ p {
   font-weight: 800;
   letter-spacing: 0;
   min-height: 0;
+  text-shadow: 0 4px 12px rgba(0, 0, 0, 0.16);
 }
 
 .hero-name-line {
@@ -978,7 +1008,8 @@ p {
   color: rgba(244, 242, 235, 0.72);
   font-size: clamp(16px, 1.42vw, 18px);
   line-height: 1.55;
-  font-weight: 400;
+  font-weight: 500;
+  text-shadow: 0 3px 10px rgba(0, 0, 0, 0.16);
 }
 
 .contact-grid {
@@ -1104,6 +1135,7 @@ p {
   font-size: inherit;
   line-height: 1.45;
   font-weight: 400;
+  text-shadow: 0 3px 10px rgba(0, 0, 0, 0.16);
   cursor: default;
   transition: none;
   will-change: auto;
@@ -3856,24 +3888,29 @@ li::before {
 
   .final-contact {
     width: min(calc(100% - 48px), var(--max));
-    height: 100%;
+    height: auto;
+    min-height: 0;
     grid-template-rows: auto auto minmax(0, 1fr) auto;
   }
 
   .final-contact-section {
+    --final-reveal-container-y: -24;
+    position: relative;
+    z-index: 2;
+    isolation: isolate;
     width: 100%;
     max-width: none;
-    height: 44vh;
-    height: 55svh;
+    height: auto;
+    min-height: 0;
     margin: 0;
     padding-top: 0px;
     padding-bottom: 0px;
   }
 
   .final-contact-container {
-    height: 44vh;
-    height: 44svh;
-    padding: 32px 0 220px;
+    height: auto;
+    min-height: 0;
+    padding: 32px 0 96px;
   }
 
   .final-thanks {

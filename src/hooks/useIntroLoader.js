@@ -16,6 +16,7 @@ export function useIntroLoader() {
     const introPercent = document.getElementById("intro-percent");
     const introIcon = document.getElementById("intro-ui-icon");
     const introLoaderLine = document.getElementById("intro-loader-line");
+    const pageBgVideo = document.querySelector(".page-bg-video");
     const completeIntroState = () => {
       document.body.classList.remove("intro-running");
       document.body.classList.add("intro-complete");
@@ -53,8 +54,12 @@ export function useIntroLoader() {
       return;
     }
 
-    const duration = 3600;
     const countDuration = 1850;
+    const revealDuration = 1750;
+    const introPanelExitMs = 680;
+    const introRevealDelayMs = 620;
+    const videoFallbackWaitMs = 7000;
+    const maxWaitingProgress = 0.98;
     const introIconChangeIntervalMs = 680;
     const introIconTransitionMs = 560;
     let start = performance.now();
@@ -62,7 +67,23 @@ export function useIntroLoader() {
     let frameId = 0;
     let contentReadyTimer = 0;
     let removeTimer = 0;
+    let revealStartTimer = 0;
+    let videoFallbackTimer = 0;
     let iconCleanupTimer = 0;
+    let videoReady = !pageBgVideo || pageBgVideo.readyState >= 2;
+    let isRevealing = false;
+
+    const setProgress = (progress, maxPercent = 100) => {
+      const clampedProgress = Math.max(0, Math.min(progress, 1));
+      const eased = 1 - Math.pow(1 - clampedProgress, 2.4);
+      const value = Math.min(maxPercent, Math.max(1, Math.round(1 + eased * 99)));
+      introPercent.textContent = `${value}%`;
+      introLoaderLine.style.transform = `scaleX(${clampedProgress})`;
+    };
+
+    const markVideoReady = () => {
+      videoReady = true;
+    };
 
     const updateIcon = (index) => {
       if (index === lastIconIndex) return;
@@ -84,34 +105,52 @@ export function useIntroLoader() {
     };
 
     const tick = (now) => {
-      const elapsed = Math.min(now - start, duration);
-      const progress = Math.min(elapsed / countDuration, 1);
-      const eased = 1 - Math.pow(1 - progress, 2.4);
-      const value = Math.max(1, Math.round(1 + eased * 99));
+      const elapsed = now - start;
+      const minLoadComplete = elapsed >= countDuration;
+      const rawProgress = Math.min(elapsed / countDuration, 1);
+      const progress = videoReady && minLoadComplete ? 1 : Math.min(rawProgress, maxWaitingProgress);
       const iconIndex = Math.min(
         introLoaderIcons.length - 1,
         Math.floor(elapsed / introIconChangeIntervalMs),
       );
 
-      introPercent.textContent = `${value}%`;
-      introLoaderLine.style.transform = `scaleX(${progress})`;
+      setProgress(progress, videoReady && minLoadComplete ? 100 : 98);
       updateIcon(iconIndex);
 
-      if (elapsed < duration) {
+      if (!videoReady || !minLoadComplete) {
         frameId = requestAnimationFrame(tick);
         return;
       }
 
-      introLoader.classList.add("is-finished");
-      completeIntroState();
-      sessionStorage.setItem(introLoaderSessionKey, "1");
-      if (introLoaderDebugHold) return;
-      removeTimer = window.setTimeout(hideIntroLoader, 500);
+      if (isRevealing) return;
+      isRevealing = true;
+      setProgress(1);
+      introLoader.classList.add("is-loading-complete");
+      revealStartTimer = window.setTimeout(() => {
+        introLoader.classList.add("is-revealing");
+      }, introRevealDelayMs);
+      contentReadyTimer = window.setTimeout(
+        markIntroContentReady,
+        introRevealDelayMs + Math.max(0, revealDuration - introContentReadyLeadMs),
+      );
+      removeTimer = window.setTimeout(() => {
+        introLoader.classList.add("is-finished");
+        completeIntroState();
+        sessionStorage.setItem(introLoaderSessionKey, "1");
+        if (introLoaderDebugHold) return;
+        hideIntroLoader();
+      }, introRevealDelayMs + revealDuration);
     };
+
+    if (pageBgVideo && !videoReady) {
+      pageBgVideo.addEventListener("loadeddata", markVideoReady, { once: true });
+      pageBgVideo.addEventListener("canplay", markVideoReady, { once: true });
+      pageBgVideo.addEventListener("error", markVideoReady, { once: true });
+      videoFallbackTimer = window.setTimeout(markVideoReady, videoFallbackWaitMs);
+    }
 
     frameId = requestAnimationFrame((now) => {
       start = now;
-      contentReadyTimer = window.setTimeout(markIntroContentReady, duration + 500 - introContentReadyLeadMs);
       frameId = requestAnimationFrame(tick);
     });
 
@@ -119,7 +158,14 @@ export function useIntroLoader() {
       cancelAnimationFrame(frameId);
       window.clearTimeout(contentReadyTimer);
       window.clearTimeout(removeTimer);
+      window.clearTimeout(revealStartTimer);
+      window.clearTimeout(videoFallbackTimer);
       window.clearTimeout(iconCleanupTimer);
+      if (pageBgVideo) {
+        pageBgVideo.removeEventListener("loadeddata", markVideoReady);
+        pageBgVideo.removeEventListener("canplay", markVideoReady);
+        pageBgVideo.removeEventListener("error", markVideoReady);
+      }
     };
   }, []);
 }

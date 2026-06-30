@@ -28,7 +28,7 @@ export default function SelectedWorksSection() {
                 >
                   <span className="selected-work-visual">
                     <span className="selected-work-parallax-layer">
-                      <img src={work.image} alt={work.imageAlt} loading="lazy" />
+                      <img src={work.image} alt={work.imageAlt} width="1000" height="1000" loading="eager" />
                     </span>
                   </span>
                 </a>

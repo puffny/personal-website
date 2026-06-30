@@ -8,7 +8,8 @@ gsap.registerPlugin(ScrollTrigger);
 export function useSmoothScroll() {
   useEffect(() => {
     const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    if (reduceMotion) {
+    const shouldUseNativeScroll = window.matchMedia("(max-width: 760px)").matches;
+    if (reduceMotion || shouldUseNativeScroll) {
       ScrollTrigger.refresh();
       return undefined;
     }

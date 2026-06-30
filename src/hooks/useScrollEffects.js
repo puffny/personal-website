@@ -15,11 +15,33 @@ export function useScrollEffects(activeSectionIds = ["home", "summary"]) {
     const sections = activeSectionIds.map((id) => document.getElementById(id)).filter(Boolean);
     let hasPlayedBackToTopHint = false;
     let wasScrolled = document.body.classList.contains("page-scrolled");
+    let resetVideoTimerId = 0;
     const shouldRestoreProjectScroll = new URLSearchParams(window.location.search).get("restoreProjectScroll") === "1";
     let isRestoringProjectScroll = shouldRestoreProjectScroll;
 
     const getActualScrolledState = () => {
       return window.scrollY > window.innerHeight * 0.3;
+    };
+
+    const resetBackgroundVideo = () => {
+      if (!pageBgVideo) return;
+      try {
+        pageBgVideo.currentTime = 0;
+      } catch {
+        pageBgVideo.addEventListener("loadedmetadata", () => {
+          pageBgVideo.currentTime = 0;
+        }, { once: true });
+      }
+    };
+
+    const scheduleBackgroundVideoReset = () => {
+      window.clearTimeout(resetVideoTimerId);
+      resetVideoTimerId = window.setTimeout(resetBackgroundVideo, 1000);
+    };
+
+    const cancelBackgroundVideoReset = () => {
+      window.clearTimeout(resetVideoTimerId);
+      resetVideoTimerId = 0;
     };
 
     const moveNavIndicator = () => {
@@ -70,12 +92,16 @@ export function useScrollEffects(activeSectionIds = ["home", "summary"]) {
 
       if (pageBgVideo) {
         const returnedToHero = wasScrolled && !isScrolled;
-        if (isScrolled && !pageBgVideo.paused) {
+        const switchedToStaticBackground = !wasScrolled && isScrolled;
+        if (switchedToStaticBackground) {
+          pageBgVideo.pause();
+          scheduleBackgroundVideoReset();
+        } else if (isScrolled && !pageBgVideo.paused) {
           pageBgVideo.pause();
         } else if (!isScrolled) {
+          cancelBackgroundVideoReset();
           if (returnedToHero) {
             pageBg?.classList.remove("page-bg-start-static");
-            pageBgVideo.currentTime = 0;
           }
           if (returnedToHero || pageBgVideo.paused) {
             pageBgVideo.play().catch(() => {});
@@ -121,6 +147,7 @@ export function useScrollEffects(activeSectionIds = ["home", "summary"]) {
       window.removeEventListener("scroll", updateHeroScrollState);
       window.removeEventListener("scroll", updateActiveFromScroll);
       window.removeEventListener("resize", moveNavIndicator);
+      cancelBackgroundVideoReset();
     };
   }, [activeSectionIds]);
 }
