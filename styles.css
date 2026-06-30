@@ -91,7 +91,7 @@ body.case-page main {
 }
 
 .page-bg {
-  --static-bg: url("/assets/hero-background-blur.webp");
+  --static-bg: url("/assets/hero-background-blur.png");
   --bg-scroll-zoom: 0;
   --bg-media-scale: calc(var(--parallax-bg-scale) + var(--bg-scroll-zoom));
   position: fixed;

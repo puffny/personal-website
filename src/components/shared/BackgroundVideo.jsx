@@ -1,4 +1,4 @@
-const blurredBackgroundSrc = "/assets/hero-background-blur.webp";
+const blurredBackgroundSrc = "/assets/hero-background-blur.png";
 
 export default function BackgroundVideo({ src, sourceType, staticOnly = false, startStatic = false }) {
   const className = [

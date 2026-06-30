@@ -19,7 +19,7 @@ export const siteData = {
     resumeHref: "/assets/liang-huifeng-ui-resume.pdf",
     logoSrc: "/assets/person-logo.svg",
     heroPhotoSrc: "/assets/hero-photo.webp",
-    backgroundVideo: "/assets/hero-background.mp4?v=20260629-tone",
+    backgroundVideo: "https://puff.oss-cn-hangzhou.aliyuncs.com/portfolio-demo/assets/hero-background.mp4?v=20260629-tone",
   },
   heroStats: [
     { value: "10+", label: "Years Experience" },
