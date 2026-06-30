@@ -1,0 +1,71 @@
+name: Deploy to Aliyun OSS
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  deploy:
+    name: Build and sync static site
+    runs-on: ubuntu-latest
+
+    env:
+      OSS_ACCESS_KEY_ID: ${{ secrets.ALIYUN_ACCESS_KEY_ID }}
+      OSS_ACCESS_KEY_SECRET: ${{ secrets.ALIYUN_ACCESS_KEY_SECRET }}
+      OSS_REGION: ${{ secrets.ALIYUN_OSS_REGION }}
+      ALIYUN_OSS_BUCKET: ${{ secrets.ALIYUN_OSS_BUCKET }}
+      ALIYUN_OSS_ENDPOINT: ${{ secrets.ALIYUN_OSS_ENDPOINT }}
+      ALIYUN_OSS_PREFIX: ${{ secrets.ALIYUN_OSS_PREFIX }}
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build site
+        run: npm run build
+
+      - name: Install ossutil 2.0
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y unzip
+          curl -fsSL -o /tmp/ossutil.zip https://gosspublic.alicdn.com/ossutil/v2/2.3.0/ossutil-2.3.0-linux-amd64.zip
+          unzip -q /tmp/ossutil.zip -d /tmp
+          sudo install -m 755 /tmp/ossutil-2.3.0-linux-amd64/ossutil /usr/local/bin/ossutil
+          ossutil --version
+
+      - name: Sync dist to OSS
+        shell: bash
+        run: |
+          missing=()
+          [ -n "$OSS_ACCESS_KEY_ID" ] || missing+=("ALIYUN_ACCESS_KEY_ID")
+          [ -n "$OSS_ACCESS_KEY_SECRET" ] || missing+=("ALIYUN_ACCESS_KEY_SECRET")
+          [ -n "$OSS_REGION" ] || missing+=("ALIYUN_OSS_REGION")
+          [ -n "$ALIYUN_OSS_BUCKET" ] || missing+=("ALIYUN_OSS_BUCKET")
+
+          if [ "${#missing[@]}" -gt 0 ]; then
+            printf 'Missing GitHub Secrets: %s\n' "${missing[*]}"
+            exit 1
+          fi
+
+          if [ -n "$ALIYUN_OSS_ENDPOINT" ]; then
+            export OSS_ENDPOINT="$ALIYUN_OSS_ENDPOINT"
+          fi
+
+          destination="oss://${ALIYUN_OSS_BUCKET}/"
+          if [ -n "$ALIYUN_OSS_PREFIX" ]; then
+            prefix="${ALIYUN_OSS_PREFIX%/}"
+            destination="oss://${ALIYUN_OSS_BUCKET}/${prefix}/"
+          fi
+
+          ossutil sync dist/ "$destination" --delete -f

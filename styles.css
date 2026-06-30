@@ -1,4 +1,4 @@
-﻿:root {
+:root {
   --bg: #050505;
   --panel: #111;
   --panel-2: #171717;
@@ -91,7 +91,7 @@ body.case-page main {
 }
 
 .page-bg {
-  --static-bg: url("/assets/hero-background-blur.png");
+  --static-bg: url("/assets/hero-background-blur.webp");
   --bg-scroll-zoom: 0;
   --bg-media-scale: calc(var(--parallax-bg-scale) + var(--bg-scroll-zoom));
   position: fixed;

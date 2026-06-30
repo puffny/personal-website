@@ -463,7 +463,7 @@ includesAll("styles.css", [
 
 includesAll("src/data/siteData.js", [
   "slug: \"senben\"",
-  "image: \"/assets/figma-project-senben.png\"",
+  "image: \"/assets/figma-project-senben.webp\"",
 ]);
 
 includesAll("src/data/siteData.js", [
