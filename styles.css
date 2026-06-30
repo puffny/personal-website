@@ -1461,7 +1461,7 @@ p {
 
 .core-sticky-stage {
   position: sticky;
-  top: calc(16vh - 48px);
+  top: calc(16vh - 70px);
   display: flex;
   min-height: 48vh;
   flex-direction: column;
@@ -2083,7 +2083,7 @@ p {
 
 .ai-lab-visual {
   position: relative;
-  height: clamp(260px, 31vw, 380px);
+  height: clamp(260px, 31vw, 360px);
   margin-top: 0px;
   overflow: visible;
   filter: none;

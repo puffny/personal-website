@@ -447,7 +447,7 @@ includesAll("styles.css", [
   "min-height: 170vh;",
   ".core-pin-frame",
   "position: sticky;",
-  "top: calc(16vh - 48px);",
+  "top: calc(16vh - 70px);",
   "min-height: min(420px, 60vh);",
   "grid-template-columns: minmax(0, 1fr) minmax(500px, 1fr);",
   "gap: clamp(0px, 0vw, 120px);",
